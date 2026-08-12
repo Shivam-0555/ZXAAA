@@ -1,0 +1,14 @@
+{
+  "name": "zxaaa",
+  "version": "1.0.0",
+  "description": "ZXAAA - Buy Sell Swap Marketplace",
+  "scripts": {
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

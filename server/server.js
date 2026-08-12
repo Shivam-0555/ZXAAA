@@ -23,10 +23,29 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+import authRoutes from './routes/authRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import swapRoutes from './routes/swapRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import http from 'http';
+import { Server } from 'socket.io';
+
 // Basic Route
 app.get('/', (req, res) => {
   res.send('ZXAAA API is running');
 });
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/swaps', swapRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Database Connection
 mongoose
@@ -34,7 +53,32 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
+// Socket.io Setup
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.id}`);
+  
+  socket.on('join_room', (room) => {
+    socket.join(room);
+  });
+  
+  socket.on('send_message', (data) => {
+    socket.to(data.room).emit('receive_message', data);
+  });
+  
+  socket.on('disconnect', () => {
+    console.log(`User disconnected: ${socket.id}`);
+  });
+});
+
 // Start Server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
