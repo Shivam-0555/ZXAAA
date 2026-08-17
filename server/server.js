@@ -30,6 +30,7 @@ import swapRoutes from './routes/swapRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -46,6 +47,7 @@ app.use('/api/swaps', swapRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Database Connection
 mongoose

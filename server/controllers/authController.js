@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { createNotificationInternal } from './notificationController.js';
 
 // Generate JWT
 const generateToken = (id) => {
@@ -45,6 +46,15 @@ export const registerUser = async (req, res) => {
     });
 
     if (user) {
+      // Create Welcome Notification
+      await createNotificationInternal({
+        user: user._id,
+        type: 'system',
+        title: 'Welcome to ZXAAA Marketplace! 🎉',
+        message: 'Your account is ready. Explore products or list your first item to start trading.',
+        link: '/explore'
+      });
+
       res.status(201).json({
         success: true,
         data: {

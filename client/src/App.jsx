@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LocationProvider, useLocationContext } from './context/LocationContext';
 import LocationModal from './components/LocationModal';
@@ -58,6 +59,25 @@ function MainLayout() {
 
   const isAuthPage = ['/login', '/register'].includes(location.pathname);
 
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadNotifCount(0);
+      return;
+    }
+    const fetchUnread = async () => {
+      try {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const { data } = await axios.get('http://localhost:5000/api/notifications', config);
+        setUnreadNotifCount(data.unreadCount || 0);
+      } catch (err) {
+        console.error('Fetch unread count error:', err);
+      }
+    };
+    fetchUnread();
+  }, [user, location.pathname]);
+
   const handleLogout = () => {
     logout();
     setDropdownOpen(false);
@@ -68,7 +88,7 @@ function MainLayout() {
   const NAV_LINKS = [
     { to: '/',               icon: <HomeIcon size={18} />,      label: 'Home' },
     { to: '/explore',        icon: <Search size={18} />,        label: 'Explore' },
-    { to: '/notifications',  icon: <Bell size={18} />,          label: 'Notifications', badge: '3' },
+    { to: '/notifications',  icon: <Bell size={18} />,          label: 'Notifications', badge: unreadNotifCount > 0 ? String(unreadNotifCount) : null },
     { to: '/sell',           icon: <Tag size={18} />,           label: 'Sell Product' },
     { to: '/swap',           icon: <RefreshCw size={18} />,     label: 'Swap Center', badge: 'NEW' },
     { to: '/messages',       icon: <MessageSquare size={18} />, label: 'Messages' },
@@ -111,9 +131,11 @@ function MainLayout() {
             title="Notifications"
             style={{ border: '1px solid var(--color-zxaaa-border)' }}>
             <Bell size={16} />
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center border border-black">
-              3
-            </span>
+            {unreadNotifCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center border border-black animate-pulse">
+                {unreadNotifCount}
+              </span>
+            )}
           </Link>
 
           <Link to="/sell"

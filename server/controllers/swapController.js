@@ -1,5 +1,6 @@
 import Swap from '../models/Swap.js';
 import Product from '../models/Product.js';
+import { createNotificationInternal } from './notificationController.js';
 
 // @desc    Propose a new swap
 // @route   POST /api/swaps
@@ -30,6 +31,16 @@ export const proposeSwap = async (req, res) => {
     });
 
     const createdSwap = await swap.save();
+
+    // Send Swap Request Notification to Receiver
+    await createNotificationInternal({
+      user: receiverProduct.seller,
+      type: 'swap',
+      title: 'Swap Request Received! 🔄',
+      message: `${req.user.name || 'A user'} proposed to swap "${proposerProduct.title}" with your "${receiverProduct.title}".`,
+      link: '/swap'
+    });
+
     res.status(201).json({ success: true, data: createdSwap });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

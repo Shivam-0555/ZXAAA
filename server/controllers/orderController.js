@@ -2,6 +2,7 @@ import Order from '../models/Order.js';
 import Transaction from '../models/Transaction.js';
 import Product from '../models/Product.js';
 import crypto from 'crypto';
+import { createNotificationInternal } from './notificationController.js';
 
 // @desc    Create a new order (Purchase Request)
 // @route   POST /api/orders
@@ -43,6 +44,23 @@ export const createOrder = async (req, res) => {
     // Change product status to RESERVED
     product.status = 'RESERVED';
     await product.save();
+
+    // Send Real Notifications to Seller & Buyer
+    await createNotificationInternal({
+      user: product.seller,
+      type: 'order',
+      title: 'New Order Received! 📦',
+      message: `A buyer reserved your listing "${product.title}" for ₹${product.price}.`,
+      link: '/seller/scan-qr'
+    });
+
+    await createNotificationInternal({
+      user: buyerId,
+      type: 'order',
+      title: 'Item Reserved Successfully! 🛍️',
+      message: `You reserved "${product.title}". Show your QR code to the seller at pickup.`,
+      link: `/product/${product._id}`
+    });
 
     res.status(201).json({ success: true, data: createdOrder });
   } catch (error) {
@@ -154,6 +172,23 @@ export const verifyQR = async (req, res) => {
     // Update Product → SOLD (prevents double purchase)
     currentProduct.status = 'SOLD';
     await currentProduct.save();
+
+    // Send Completion Notifications to Seller & Buyer
+    await createNotificationInternal({
+      user: order.seller._id,
+      type: 'order',
+      title: 'Transaction Verified & Completed! ✅',
+      message: `Payment of ₹${order.amount} for "${currentProduct.title}" verified via QR scan.`,
+      link: '/notifications'
+    });
+
+    await createNotificationInternal({
+      user: order.buyer._id,
+      type: 'order',
+      title: 'Purchase Completed! 🧾',
+      message: `Your purchase of "${currentProduct.title}" has been verified. Digital receipt generated.`,
+      link: `/product/${currentProduct._id}`
+    });
 
     // Return full receipt data
     res.json({
