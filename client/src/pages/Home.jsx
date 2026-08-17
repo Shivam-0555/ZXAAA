@@ -5,6 +5,7 @@ import { useLocationContext } from '../context/LocationContext';
 import { useAuth } from '../context/AuthContext';
 import HowItWorksModal from '../components/HowItWorksModal';
 import ProductCard, { ProductCardSkeleton } from '../components/ProductCard';
+import Logo from '../components/Logo';
 import {
   Smartphone, Laptop, Bike, Armchair, BookOpen, Shirt, Zap, MoreHorizontal,
   RefreshCw, QrCode, Search, ArrowRight, Star, TrendingUp, Package, ShoppingBag,
@@ -100,11 +101,14 @@ export default function Home() {
 
           <div className="relative z-10 max-w-xl">
             {/* Badge */}
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full mb-4"
-              style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', color: '#c4b5fd' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              ZXAAA Marketplace — Now Live in {selectedLocation.name.split(',')[0]}
-            </span>
+            <div className="flex items-center gap-3 mb-4">
+              <Logo size="md" interactive={false} showText={false} />
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full"
+                style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', color: '#c4b5fd' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                ZXAAA Marketplace — Now Live in {selectedLocation.name.split(',')[0]}
+              </span>
+            </div>
 
             <h1 className="text-4xl md:text-5xl font-black leading-[1.1] mb-2 text-white">
               Buy. Sell. Swap.

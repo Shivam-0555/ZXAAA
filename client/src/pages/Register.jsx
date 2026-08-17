@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus } from 'lucide-react';
+import Logo from '../components/Logo';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -50,9 +51,10 @@ const Register = () => {
   return (
     <div className="flex justify-center items-center h-full min-h-[80vh] py-8">
       <div className="glass-panel p-8 rounded-2xl w-full max-w-lg">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold gradient-text mb-2">Create Account</h2>
-          <p className="text-[var(--color-zxaaa-muted)]">Join the ZXAAA community</p>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Logo size="lg" interactive={false} showText={false} className="mb-2" />
+          <h2 className="text-3xl font-bold gradient-text mb-1">Create Account</h2>
+          <p className="text-[var(--color-zxaaa-muted)] text-sm">Join the ZXAAA Marketplace community</p>
         </div>
         
         {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6">{error}</div>}

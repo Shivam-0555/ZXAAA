@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LocationProvider, useLocationContext } from './context/LocationContext';
 import LocationModal from './components/LocationModal';
 import ProtectedRoute from './components/ProtectedRoute';
+import Logo from './components/Logo';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -14,6 +15,7 @@ import SwapCenter from './pages/SwapCenter';
 import Messages from './pages/Messages';
 import AdminDashboard from './pages/AdminDashboard';
 import ScanQR from './pages/ScanQR';
+import Notifications from './pages/Notifications';
 import {
   Home as HomeIcon, Search, Tag, RefreshCw, MessageSquare, QrCode,
   Shield, LogOut, ChevronDown, MapPin, Menu, X, User as UserIcon,
@@ -66,6 +68,7 @@ function MainLayout() {
   const NAV_LINKS = [
     { to: '/',               icon: <HomeIcon size={18} />,      label: 'Home' },
     { to: '/explore',        icon: <Search size={18} />,        label: 'Explore' },
+    { to: '/notifications',  icon: <Bell size={18} />,          label: 'Notifications', badge: '3' },
     { to: '/sell',           icon: <Tag size={18} />,           label: 'Sell Product' },
     { to: '/swap',           icon: <RefreshCw size={18} />,     label: 'Swap Center', badge: 'NEW' },
     { to: '/messages',       icon: <MessageSquare size={18} />, label: 'Messages' },
@@ -87,11 +90,7 @@ function MainLayout() {
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <Link to="/" className="text-xl font-black gradient-text tracking-tight">ZXAAA</Link>
-          <span className="hidden sm:inline-flex text-[9px] font-bold px-2 py-0.5 rounded-full"
-            style={{ background: 'rgba(124,58,237,0.15)', color: '#c4b5fd', border: '1px solid rgba(124,58,237,0.25)' }}>
-            MARKETPLACE
-          </span>
+          <Logo size="sm" />
         </div>
 
         {/* Center: Location pill */}
@@ -107,6 +106,16 @@ function MainLayout() {
 
         {/* Right: actions */}
         <div className="flex items-center gap-2">
+          <Link to="/notifications"
+            className="p-2 rounded-xl text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/[0.05] transition-all relative"
+            title="Notifications"
+            style={{ border: '1px solid var(--color-zxaaa-border)' }}>
+            <Bell size={16} />
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center border border-black">
+              3
+            </span>
+          </Link>
+
           <Link to="/sell"
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
             style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}>
@@ -231,6 +240,7 @@ function MainLayout() {
             <Routes>
               <Route path="/"               element={<Home />} />
               <Route path="/explore"        element={<Explore />} />
+              <Route path="/notifications"  element={<Notifications />} />
               <Route path="/product/:id"    element={<ProductDetail />} />
               <Route path="/sell"           element={<ProtectedRoute><Sell /></ProtectedRoute>} />
               <Route path="/swap"           element={<SwapCenter />} />

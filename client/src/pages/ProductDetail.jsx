@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { Image as ImageIcon, MapPin, Tag, ShieldCheck } from 'lucide-react';
+import RealQRCode from '../components/RealQRCode';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -11,6 +13,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   const [order, setOrder] = useState(null);
   const [buying, setBuying] = useState(false);
@@ -46,7 +49,6 @@ const ProductDetail = () => {
         config
       );
       setOrder(data.data);
-      // Refresh product state
       setProduct(prev => ({ ...prev, status: 'RESERVED' }));
     } catch (err) {
       alert(err.response?.data?.message || 'Purchase failed');
@@ -85,69 +87,117 @@ const ProductDetail = () => {
   if (error) return <div className="p-8 text-red-500">{error}</div>;
   if (!product) return null;
 
+  const imagesList = product.images && product.images.length > 0
+    ? product.images
+    : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop'];
+
+  const currentMainImage = imagesList[selectedImage] || imagesList[0];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="glass-panel p-8 rounded-2xl flex flex-col md:flex-row gap-8">
-        <div className="flex-1">
-          {/* Image Gallery */}
-          {product.images && product.images.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {product.images.map((img, idx) => (
-                <img
+    <div className="max-w-4xl mx-auto space-y-8 pb-12">
+      <div className="glass-panel p-6 md:p-8 rounded-2xl flex flex-col md:flex-row gap-8">
+        
+        {/* Interactive 6-Image Viewer Gallery */}
+        <div className="w-full md:w-1/2 space-y-4">
+          {/* Main Large Display Image */}
+          <div className="relative h-72 sm:h-80 w-full rounded-2xl overflow-hidden border border-[var(--color-zxaaa-border)] bg-black/40">
+            <img
+              src={currentMainImage}
+              alt={product.title}
+              className="w-full h-full object-cover transition-all duration-300"
+              onError={(e) => {
+                e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop';
+              }}
+            />
+            <span className="absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full bg-black/70 text-purple-300 backdrop-blur-md border border-white/10">
+              Photo {selectedImage + 1} of {imagesList.length}
+            </span>
+          </div>
+
+          {/* 6 Thumbnail Selector Grid */}
+          {imagesList.length > 0 && (
+            <div className="grid grid-cols-6 gap-2">
+              {imagesList.map((img, idx) => (
+                <button
                   key={idx}
-                  src={img}
-                  alt={`${product.title} image ${idx + 1}`}
-                  className="object-cover w-full h-48 rounded-lg border border-[var(--color-zxaaa-border)]"
-                />
+                  onClick={() => setSelectedImage(idx)}
+                  className={`relative h-14 rounded-xl overflow-hidden border transition-all duration-200 ${
+                    selectedImage === idx
+                      ? 'border-purple-500 ring-2 ring-purple-500/50 scale-105'
+                      : 'border-[var(--color-zxaaa-border)] opacity-60 hover:opacity-100 hover:border-purple-400'
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        <div className="flex-1 space-y-4">
-          {product.status === 'SOLD' && (
-            <div className="bg-red-500/20 text-red-500 font-bold px-3 py-1 rounded-md inline-block">
-              🔴 SOLD
-            </div>
-          )}
-          {product.status === 'RESERVED' && (
-            <div className="bg-yellow-500/20 text-yellow-500 font-bold px-3 py-1 rounded-md inline-block">
-              🟡 RESERVED
-            </div>
-          )}
+        {/* Product Details Info */}
+        <div className="w-full md:w-1/2 space-y-4 flex flex-col justify-between">
+          <div>
+            {product.status === 'SOLD' && (
+              <div className="bg-red-500/20 text-red-500 font-bold px-3 py-1 rounded-full text-xs inline-block mb-2">
+                🔴 SOLD
+              </div>
+            )}
+            {product.status === 'RESERVED' && (
+              <div className="bg-yellow-500/20 text-yellow-500 font-bold px-3 py-1 rounded-full text-xs inline-block mb-2">
+                🟡 RESERVED
+              </div>
+            )}
 
-          <h1 className="text-3xl font-bold">{product.title}</h1>
-          
-          {/* Seller Info */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-[var(--color-zxaaa-purple)] flex items-center justify-center text-sm font-bold text-white">
-              {product.seller?.name?.charAt(0) ?? 'U'}
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">{product.title}</h1>
+            
+            {/* Seller Info */}
+            <div className="flex items-center gap-3 my-4 p-3 rounded-xl bg-white/[0.03] border border-[var(--color-zxaaa-border)]">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                {product.seller?.name?.charAt(0) ?? 'U'}
+              </div>
+              <div className="overflow-hidden">
+                <div className="font-bold text-white text-sm truncate">{product.seller?.name ?? 'Verified Seller'}</div>
+                <div className="text-xs text-[var(--color-zxaaa-muted)] flex items-center gap-1">
+                  <ShieldCheck size={13} className="text-purple-400" /> Trust Score: {product.seller?.trustScore ?? '95'}/100
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="font-medium">{product.seller?.name ?? 'Unknown Seller'}</div>
-              <div className="text-xs text-[var(--color-zxaaa-muted)]">Trust Score: {product.seller?.trustScore ?? 'N/A'}/100</div>
+
+            <div className="text-3xl font-black text-emerald-400 mb-4">₹{product.price?.toLocaleString('en-IN')}</div>
+
+            <div className="flex flex-wrap gap-2 text-xs font-semibold text-zinc-300">
+              <span className="bg-purple-950/40 text-purple-300 border border-purple-500/30 px-3 py-1 rounded-full flex items-center gap-1">
+                <Tag size={12} /> {product.category}
+              </span>
+              <span className="bg-blue-950/40 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full">
+                {product.condition} condition
+              </span>
+              <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 px-3 py-1 rounded-full flex items-center gap-1">
+                <MapPin size={12} /> {product.city || 'Vadodara'}
+              </span>
             </div>
+
+            <p className="text-zinc-300 text-sm mt-4 leading-relaxed">{product.description}</p>
           </div>
-          <div className="text-2xl font-bold gradient-text">₹{product.price}</div>
 
-          <div className="flex gap-4 text-sm text-[var(--color-zxaaa-muted)]">
-            <span className="bg-[var(--color-zxaaa-card)] px-3 py-1 rounded-full">{product.category}</span>
-            <span className="bg-[var(--color-zxaaa-card)] px-3 py-1 rounded-full">{product.condition} condition</span>
-          </div>
-
-          <p className="text-[var(--color-zxaaa-muted)] mt-4">{product.description}</p>
-
-          {product.status === 'ACTIVE' && user?._id !== product.seller._id && (
-            <div className="flex gap-4 pt-4">
-              <button className="flex-1 border border-[var(--color-zxaaa-purple)] text-[var(--color-zxaaa-purple)] font-bold py-3 rounded-lg hover:bg-[var(--color-zxaaa-purple)] hover:text-white transition-colors">
-                Chat
+          {product.status === 'ACTIVE' && user?._id !== product.seller?._id && (
+            <div className="flex gap-3 pt-4 border-t border-[var(--color-zxaaa-border)]">
+              <button 
+                onClick={() => navigate('/messages')}
+                className="flex-1 border border-purple-500 text-purple-400 font-bold py-3 rounded-xl hover:bg-purple-600 hover:text-white transition-all text-sm"
+              >
+                💬 Chat Seller
               </button>
               <button
                 onClick={handleBuy}
                 disabled={buying}
-                className="flex-1 bg-gradient-to-r from-[var(--color-zxaaa-blue)] to-[var(--color-zxaaa-purple)] text-white font-bold py-3 rounded-lg hover:opacity-90"
+                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 rounded-xl hover:opacity-90 transition-all text-sm shadow-lg shadow-purple-600/30"
               >
-                {buying ? 'Processing...' : 'Buy Now'}
+                {buying ? 'Processing...' : '⚡ Buy Now'}
               </button>
             </div>
           )}
@@ -156,51 +206,39 @@ const ProductDetail = () => {
 
       {/* Transaction & QR System Panel */}
       {order && product.status !== 'SOLD' && (
-        <div className="glass-panel p-8 rounded-2xl border border-[var(--color-zxaaa-blue)]">
-          <h2 className="text-2xl font-bold mb-4">ZXAAA Secure Transaction</h2>
-          <p className="text-[var(--color-zxaaa-muted)] mb-6">
-            You have reserved this product. Meet the seller and inspect the item physically.
-          </p>
+        <div className="glass-panel p-8 rounded-2xl border border-purple-500/40 space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-white">ZXAAA Secure Transaction</h2>
+            <p className="text-xs text-[var(--color-zxaaa-muted)] mt-1">
+              You have reserved this product. Show this real scannable QR code to the seller during in-person pickup.
+            </p>
+          </div>
 
-          <div className="bg-[var(--color-zxaaa-bg)] p-6 rounded-xl border border-[var(--color-zxaaa-border)] flex flex-col items-center justify-center space-y-4">
-            <div className="text-lg font-bold">Show this QR to the seller:</div>
-            <div className="w-48 h-48 bg-white flex items-center justify-center p-4 rounded-xl shadow-lg">
-              {qrDataUrl ? (
-                <img src={qrDataUrl} alt="QR Code" className="w-full h-full object-contain" />
-              ) : (
-                <span className="text-sm text-gray-500">Generating QR...</span>
-              )}
-            </div>
-            
-            {order.qrReference && (
-              <div className="text-center">
-                <div className="text-xs text-[var(--color-zxaaa-muted)] mb-1">Manual Reference Code (Fallback):</div>
-                <code className="bg-[var(--color-zxaaa-card)] px-3 py-1.5 rounded-lg text-emerald-400 font-mono text-sm border border-[var(--color-zxaaa-border)] tracking-wider">
-                  {order.qrReference}
-                </code>
-              </div>
-            )}
+          <RealQRCode 
+            value={order.qrReference}
+            title="Buyer Pick-Up QR Code"
+            subtitle={`Order ID: ${order.orderId}`}
+          />
 
-            <div className="w-full pt-4 border-t border-[var(--color-zxaaa-border)] flex flex-col items-center gap-2">
-              <p className="text-sm text-yellow-500 mb-2">Simulate Seller Scanning QR (Dev Tool):</p>
-              <button
-                onClick={handleVerifyQR}
-                disabled={verifyLoading}
-                className="bg-[var(--color-zxaaa-purple)] text-white px-6 py-2 rounded-lg font-bold"
-              >
-                {verifyLoading ? 'Verifying...' : 'Simulate Scan & Pay at Pickup'}
-              </button>
-            </div>
+          <div className="pt-4 border-t border-[var(--color-zxaaa-border)] flex flex-col items-center gap-2">
+            <p className="text-xs text-yellow-400">Simulate Seller Scanning QR (Dev Tool):</p>
+            <button
+              onClick={handleVerifyQR}
+              disabled={verifyLoading}
+              className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-purple-600/30"
+            >
+              {verifyLoading ? 'Verifying...' : '⚡ Simulate Scan & Pay at Pickup'}
+            </button>
           </div>
         </div>
       )}
 
       {product.status === 'SOLD' && order && (
         <div className="glass-panel p-8 rounded-2xl border border-green-500/50 bg-green-500/10">
-          <h2 className="text-2xl font-bold text-green-400 mb-4">Transaction Completed!</h2>
-          <p>Digital Receipt: {order.orderId}</p>
-          <p>Payment: {order.paymentMethod}</p>
-          <p>Status: VERIFIED</p>
+          <h2 className="text-2xl font-bold text-green-400 mb-2">Transaction Completed!</h2>
+          <p className="text-sm text-zinc-300">Digital Receipt: {order.orderId}</p>
+          <p className="text-sm text-zinc-300">Payment: {order.paymentMethod}</p>
+          <p className="text-sm text-zinc-300">Status: VERIFIED</p>
         </div>
       )}
     </div>

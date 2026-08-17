@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import useQRScanner from '../hooks/useQRScanner';
 import axios from 'axios';
+import RealQRCode from '../components/RealQRCode';
 import {
   ScanLine,
   Camera,
@@ -18,6 +19,8 @@ import {
   CreditCard,
   Calendar,
   Hash,
+  QrCode as QrIcon,
+  Sparkles,
 } from 'lucide-react';
 
 const SCANNER_ELEMENT_ID = 'qr-reader-box';
@@ -28,6 +31,8 @@ const ScanQR = () => {
   const [verifyResult, setVerifyResult] = useState(null); // { success, message, data }
   const [verifying, setVerifying] = useState(false);
   const [showManual, setShowManual] = useState(false);
+  const [activeMode, setActiveMode] = useState('scan'); // 'scan' | 'generate'
+  const [genText, setGenText] = useState('ZX-TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase());
 
   // Handle decoded QR text
   const handleQRDecode = useCallback(
@@ -191,24 +196,87 @@ const ScanQR = () => {
 
   // ─── SCANNER VIEW ─────────────────────────────────────────────
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto space-y-6">
       {/* Header */}
-      <div className="mb-6">
+      <div>
         <div className="flex items-center gap-3 mb-2">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
           >
             <ScanLine className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Scan QR Code</h1>
+            <h1 className="text-xl font-bold text-white">QR Verification & Generator</h1>
             <p className="text-xs text-gray-400">
-              Verify transactions by scanning the buyer's QR code
+              Scan buyer codes or generate real high-res scannable QR codes
             </p>
           </div>
         </div>
       </div>
+
+      {/* Mode Tabs */}
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl glass-panel border border-[var(--color-zxaaa-border)]">
+        <button
+          onClick={() => setActiveMode('scan')}
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            activeMode === 'scan'
+              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-600/30'
+              : 'text-[var(--color-zxaaa-muted)] hover:text-white'
+          }`}
+        >
+          <Camera size={15} /> Scan QR Code
+        </button>
+        <button
+          onClick={() => setActiveMode('generate')}
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+            activeMode === 'generate'
+              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-600/30'
+              : 'text-[var(--color-zxaaa-muted)] hover:text-white'
+          }`}
+        >
+          <QrIcon size={15} /> Generate Real QR
+        </button>
+      </div>
+
+      {/* GENERATE MODE PANEL */}
+      {activeMode === 'generate' ? (
+        <div className="space-y-4 animate-fadeIn">
+          <div className="glass-panel p-6 rounded-2xl border border-[var(--color-zxaaa-border)] space-y-4">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Sparkles size={16} className="text-purple-400" /> Real QR Code Generator
+            </h3>
+            
+            <div>
+              <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                QR Code Text / Reference Code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={genText}
+                  onChange={(e) => setGenText(e.target.value)}
+                  placeholder="Enter order reference or custom text"
+                  className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-purple-500"
+                />
+                <button
+                  onClick={() => setGenText('ZX-TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase())}
+                  className="px-3 py-2.5 rounded-xl text-xs font-bold text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all shrink-0"
+                >
+                  New Random
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <RealQRCode 
+            value={genText || 'ZX-TXN-DEMO'}
+            title="Real Scannable QR Code"
+            subtitle="Scan using any phone camera or the ZXAAA scanner tab"
+          />
+        </div>
+      ) : (
+        <>
 
       {/* Error Banner */}
       {verifyResult && !verifyResult.success && (
@@ -411,6 +479,8 @@ const ScanQR = () => {
             <p className="text-gray-500 text-xs">Please wait while we validate</p>
           </div>
         </div>
+      )}
+      </>
       )}
 
       {/* Print-only styles */}
