@@ -3,9 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Link, NavLink, useNavigate, use
 import axios from 'axios';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LocationProvider, useLocationContext } from './context/LocationContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LocationModal from './components/LocationModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import Logo from './components/Logo';
+import ThemeSwitcher from './components/ThemeSwitcher';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -126,6 +128,8 @@ function MainLayout() {
 
         {/* Right: actions */}
         <div className="flex items-center gap-2">
+          <ThemeSwitcher />
+
           <Link to="/notifications"
             className="p-2 rounded-xl text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/[0.05] transition-all relative"
             title="Notifications"
@@ -288,13 +292,15 @@ function MainLayout() {
 
 function App() {
   return (
-    <AuthProvider>
-      <LocationProvider>
-        <Router>
-          <MainLayout />
-        </Router>
-      </LocationProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <LocationProvider>
+          <Router>
+            <MainLayout />
+          </Router>
+        </LocationProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
