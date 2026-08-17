@@ -117,7 +117,7 @@ export default function Notifications() {
         <Bell size={44} className="mx-auto text-purple-400 opacity-60" />
         <h2 className="text-xl font-bold text-white">Sign In to View Notifications</h2>
         <p className="text-xs text-[var(--color-zxaaa-muted)]">
-          Stay updated on your real swap proposals, order receipts, and buyer messages.
+          Stay updated on your swap proposals, order receipts, and buyer messages.
         </p>
         <Link
           to="/login"
@@ -149,14 +149,14 @@ export default function Notifications() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-white tracking-tight">Real Notifications</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Notifications</h1>
               {unreadCount > 0 && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-600 text-white">
                   {unreadCount} new
                 </span>
               )}
             </div>
-            <p className="text-xs text-[var(--color-zxaaa-muted)] mt-0.5">Real-time alerts for your live swaps, orders, and messages</p>
+            <p className="text-xs text-[var(--color-zxaaa-muted)] mt-0.5">Alerts for your swaps, orders, and messages</p>
           </div>
         </div>
 
@@ -231,7 +231,7 @@ export default function Notifications() {
             <Bell size={40} className="mx-auto text-[var(--color-zxaaa-muted)] mb-3 opacity-40" />
             <h3 className="text-base font-semibold text-white">No notifications yet</h3>
             <p className="text-xs text-[var(--color-zxaaa-muted)] mt-1 max-w-sm mx-auto">
-              Real notifications will automatically appear here when someone requests a swap, places an order, or sends you a message!
+              Notifications will automatically appear here when someone requests a swap, places an order, or sends you a message!
             </p>
           </div>
         ) : (
