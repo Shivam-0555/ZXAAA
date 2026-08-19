@@ -6,6 +6,7 @@ import { LocationProvider, useLocationContext } from './context/LocationContext'
 import { ThemeProvider } from './context/ThemeContext';
 import LocationModal from './components/LocationModal';
 import ProtectedRoute from './components/ProtectedRoute';
+
 import Logo from './components/Logo';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import Login from './pages/Login';
@@ -21,7 +22,7 @@ import ScanQR from './pages/ScanQR';
 import Notifications from './pages/Notifications';
 import {
   Home as HomeIcon, Search, Tag, RefreshCw, MessageSquare, QrCode,
-  Shield, LogOut, ChevronDown, MapPin, Menu, X, User as UserIcon,
+  Shield, LogOut, MapPin, ChevronDown, Menu, X, User as UserIcon,
   Bell, Plus,
 } from 'lucide-react';
 
@@ -121,7 +122,7 @@ function MainLayout() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:scale-[1.02]"
           style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
           <MapPin size={13} className="text-purple-400" />
-          <span className="hidden sm:inline max-w-[120px] truncate">{selectedLocation.name}</span>
+          <span className="hidden sm:inline max-w-[120px] truncate">{selectedLocation.name.split(',')[0]}</span>
           <span className="text-purple-400 text-[10px] font-bold">{radiusKm}km</span>
           <ChevronDown size={12} className="text-[var(--color-zxaaa-muted)]" />
         </button>

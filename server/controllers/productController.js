@@ -8,9 +8,7 @@ export const getProducts = async (req, res) => {
     const { 
       keyword, 
       category, 
-      longitude, 
-      latitude, 
-      maxDistance = 10000 // default 10km
+      city
     } = req.query;
 
     let query = { status: 'ACTIVE' };
@@ -23,16 +21,9 @@ export const getProducts = async (req, res) => {
       query.category = category;
     }
 
-    if (longitude && latitude) {
-      query.location = {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [parseFloat(longitude), parseFloat(latitude)],
-          },
-          $maxDistance: parseInt(maxDistance),
-        },
-      };
+    if (city) {
+      // Perform case-insensitive match for city
+      query.city = { $regex: new RegExp(`^${city}$`, 'i') };
     }
 
     const products = await Product.find(query).populate('seller', 'name trustScore isVerified profileImage').sort({ createdAt: -1 });

@@ -5,7 +5,6 @@ import { useLocationContext } from '../context/LocationContext';
 import { useAuth } from '../context/AuthContext';
 import HowItWorksModal from '../components/HowItWorksModal';
 import ProductCard, { ProductCardSkeleton } from '../components/ProductCard';
-import Logo from '../components/Logo';
 import {
   Smartphone, Laptop, Bike, Armchair, BookOpen, Shirt, Zap, MoreHorizontal,
   RefreshCw, QrCode, Search, ArrowRight, Star, TrendingUp, Package, ShoppingBag,
@@ -50,22 +49,14 @@ export default function Home() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const { longitude, latitude } = selectedLocation;
-        const maxDistance = radiusKm * 1000;
-        let url = `http://localhost:5000/api/products?longitude=${longitude}&latitude=${latitude}&maxDistance=${maxDistance}`;
+        const cityName = selectedLocation.name.split(',')[0].trim();
+        let url = `http://localhost:5000/api/products?city=${encodeURIComponent(cityName)}`;
         if (activeCategory && activeCategory !== 'More') url += `&category=${encodeURIComponent(activeCategory)}`;
         const { data } = await axios.get(url);
         let list = data.data || [];
-        if (list.length === 0) {
-          const fb = await axios.get('http://localhost:5000/api/products');
-          list = fb.data.data || [];
-        }
         if (!cancelled) setProducts(list);
       } catch {
-        try {
-          const fb = await axios.get('http://localhost:5000/api/products');
-          if (!cancelled) setProducts(fb.data.data || []);
-        } catch { /* ignore */ }
+        if (!cancelled) setProducts([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -100,15 +91,7 @@ export default function Home() {
             style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%)' }} />
 
           <div className="relative z-10 max-w-xl">
-            {/* Badge */}
-            <div className="flex items-center gap-3 mb-4">
-              <Logo size="md" interactive={false} showText={false} />
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full"
-                style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', color: '#c4b5fd' }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                ZXAAA Marketplace — Now Live in {selectedLocation.name.split(',')[0]}
-              </span>
-            </div>
+
 
             <h1 className="text-4xl md:text-5xl font-black leading-[1.1] mb-2 text-white">
               Buy. Sell. Swap.

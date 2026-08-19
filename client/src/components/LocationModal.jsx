@@ -6,11 +6,8 @@ const LocationModal = ({ isOpen, onClose }) => {
   const {
     selectedLocation,
     selectCity,
-    detectGPS,
     radiusKm,
     setRadiusKm,
-    gpsLoading,
-    gpsError,
     cities,
   } = useLocationContext();
 
@@ -55,37 +52,6 @@ const LocationModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* GPS Location Button */}
-        <div className="mb-5">
-          <button
-            onClick={() => {
-              detectGPS();
-            }}
-            disabled={gpsLoading}
-            className="w-full p-3.5 rounded-2xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-200 text-sm font-semibold flex items-center justify-between transition-all group cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5">
-              <Navigation
-                className={`w-4 h-4 text-purple-400 ${
-                  gpsLoading ? 'animate-spin' : 'group-hover:scale-110'
-                } transition-transform`}
-              />
-              <span>
-                {gpsLoading
-                  ? 'Detecting GPS Coordinates...'
-                  : 'Use My Current Location (GPS)'}
-              </span>
-            </div>
-            {selectedLocation.isGPS && (
-              <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 border border-emerald-500/30">
-                <Check size={12} /> Active
-              </span>
-            )}
-          </button>
-          {gpsError && (
-            <p className="text-xs text-red-400 mt-2 px-1">{gpsError}</p>
-          )}
-        </div>
 
         {/* Search City Input */}
         <div className="relative mb-4">

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLocationContext } from '../context/LocationContext';
 import { Image as ImageIcon, Plus, Trash2, Sparkles, CheckCircle2 } from 'lucide-react';
 
 const SAMPLE_IMAGE_SETS = [
@@ -15,6 +16,7 @@ const SAMPLE_IMAGE_SETS = [
 
 const Sell = () => {
   const { user } = useAuth();
+  const { selectedLocation } = useLocationContext();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -22,8 +24,7 @@ const Sell = () => {
     description: '',
     category: 'Electronics',
     condition: 'Good',
-    price: '',
-    city: 'Vadodara'
+    price: ''
   });
 
   // Array of 6 image URLs
@@ -76,10 +77,10 @@ const Sell = () => {
         category: formData.category,
         condition: formData.condition,
         price: Number(formData.price),
-        city: formData.city,
+        city: selectedLocation.name.split(',')[0].trim(),
         images: finalImages,
-        latitude: 22.3072,
-        longitude: 73.1812
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude
       };
       
       await axios.post('http://localhost:5000/api/products', payload, config);
@@ -184,11 +185,11 @@ const Sell = () => {
               <label className="block text-sm font-semibold mb-1.5 text-white">City *</label>
               <input 
                 type="text" 
-                required
-                value={formData.city}
-                onChange={e => setFormData({...formData, city: e.target.value})}
-                className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 focus:outline-none focus:border-[var(--color-zxaaa-purple)] text-white text-sm" 
+                readOnly
+                value={selectedLocation.name.split(',')[0].trim()}
+                className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-[var(--color-zxaaa-muted)] text-sm cursor-not-allowed opacity-70" 
               />
+              <p className="text-[10px] text-[var(--color-zxaaa-muted)] mt-1 ml-1">Location set from your current city selection</p>
             </div>
           </div>
 

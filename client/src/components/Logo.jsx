@@ -34,21 +34,9 @@ export default function Logo({
 
       {/* Brand Name Typography */}
       {showText && (
-        <div className="flex items-center gap-1.5">
-          <span className={`${currentSize.text} font-black tracking-tight gradient-text`}>
+        <span className={`${currentSize.text} font-black tracking-tight gradient-text`}>
             ZXAAA
           </span>
-          <span 
-            className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md tracking-wider uppercase hidden sm:inline-block"
-            style={{
-              background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(37,99,235,0.2))',
-              border: '1px solid rgba(124,58,237,0.4)',
-              color: '#c4b5fd'
-            }}
-          >
-            PRO
-          </span>
-        </div>
       )}
     </div>
   );

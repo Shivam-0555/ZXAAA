@@ -20,18 +20,11 @@ export default function Explore() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const { longitude, latitude } = selectedLocation;
-        const maxDistance = radiusKm * 1000;
-        let url = `http://localhost:5000/api/products?longitude=${longitude}&latitude=${latitude}&maxDistance=${maxDistance}`;
+        const cityName = selectedLocation.name.split(',')[0].trim();
+        let url = `http://localhost:5000/api/products?city=${encodeURIComponent(cityName)}`;
         if (category !== 'All') url += `&category=${encodeURIComponent(category)}`;
         const { data } = await axios.get(url);
         let list = data.data || [];
-        if (list.length === 0) {
-          let fb = `http://localhost:5000/api/products`;
-          if (category !== 'All') fb += `?category=${encodeURIComponent(category)}`;
-          const fallback = await axios.get(fb);
-          list = fallback.data.data || [];
-        }
         if (!cancelled) { setProducts(list); setError(''); }
       } catch (err) {
         if (!cancelled) setError(err.response?.data?.message || 'Failed to fetch products');
