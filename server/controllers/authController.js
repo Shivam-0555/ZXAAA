@@ -61,6 +61,9 @@ export const registerUser = async (req, res) => {
           _id: user._id,
           name: user.name,
           email: user.email,
+          phone: user.phone,
+          city: user.city,
+          trustScore: user.trustScore,
           role: user.role,
           token: generateToken(user._id),
         },
@@ -94,6 +97,9 @@ export const loginUser = async (req, res) => {
           _id: user._id,
           name: user.name,
           email: user.email,
+          phone: user.phone,
+          city: user.city,
+          trustScore: user.trustScore,
           role: user.role,
           token: generateToken(user._id),
         },
@@ -117,6 +123,48 @@ export const getUserProfile = async (req, res) => {
     } else {
       res.status(404).json({ success: false, message: 'User not found' });
     }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.name = req.body.name || user.name;
+    user.phone = req.body.phone || user.phone;
+    user.city = req.body.city || user.city;
+    if (req.body.profileImage !== undefined) {
+      user.profileImage = req.body.profileImage;
+    }
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        city: updatedUser.city,
+        profileImage: updatedUser.profileImage,
+        trustScore: updatedUser.trustScore,
+        role: updatedUser.role,
+        token: generateToken(updatedUser._id),
+      },
+      message: 'Profile updated successfully!',
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

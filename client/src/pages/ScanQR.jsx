@@ -95,32 +95,34 @@ const ScanQR = () => {
     return (
       <div className="max-w-lg mx-auto animate-fadeIn" id="scan-qr-receipt">
         {/* Success Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/20 mb-4">
-            <CheckCircle2 className="w-10 h-10 text-green-400" />
+        <div className="text-center mb-6 pt-4">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 border-4 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+            <CheckCircle2 className="w-12 h-12 text-emerald-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Transaction Verified!</h1>
-          <p className="text-gray-400 text-sm">The product has been marked as SOLD</p>
+          <h1 className="text-3xl font-black text-white mb-2">Transaction Verified!</h1>
+          <p className="text-[var(--color-zxaaa-muted)] font-bold">The product has been successfully transferred.</p>
         </div>
 
         {/* Receipt Card */}
         <div
-          className="rounded-2xl p-6 mb-6"
+          className="rounded-[24px] p-8 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(30,30,50,0.95), rgba(20,20,35,0.95))',
-            border: '1px solid rgba(139,92,246,0.3)',
-            boxShadow: '0 0 40px rgba(139,92,246,0.08)',
+            background: 'var(--color-zxaaa-card)',
+            border: '1px solid var(--color-zxaaa-primary-glow)',
+            boxShadow: '0 0 40px var(--color-zxaaa-primary-glow)',
           }}
         >
-          <div className="flex items-center gap-2 mb-5 pb-4 border-b border-gray-700/50">
-            <ShieldCheck className="w-5 h-5 text-purple-400" />
-            <span className="text-purple-300 font-semibold text-sm tracking-wide uppercase">
+          <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'var(--color-zxaaa-primary)' }} />
+          
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[var(--color-zxaaa-border)]">
+            <ShieldCheck className="w-6 h-6 text-[var(--color-zxaaa-primary)]" />
+            <span className="text-white font-black tracking-wide uppercase">
               Digital Receipt
             </span>
-            <span className="ml-auto text-xs text-gray-500">#{order.orderId}</span>
+            <span className="ml-auto text-xs font-bold text-[var(--color-zxaaa-muted)]">#{order.orderId}</span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             <ReceiptRow
               icon={<Package className="w-4 h-4" />}
               label="Product"
@@ -149,45 +151,27 @@ const ScanQR = () => {
             />
           </div>
 
-          <div className="mt-5 pt-4 border-t border-gray-700/50 flex items-center justify-between">
-            <span
-              className="text-xs px-3 py-1 rounded-full font-bold tracking-wider"
-              style={{
-                background: 'rgba(34,197,94,0.15)',
-                color: '#4ade80',
-                border: '1px solid rgba(34,197,94,0.3)',
-              }}
-            >
+          <div className="mt-8 pt-6 border-t border-[var(--color-zxaaa-border)] flex items-center justify-between">
+            <span className="text-xs px-4 py-1.5 rounded-full font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
               COMPLETED
             </span>
-            <span className="text-xs text-gray-500">ZXAAA Marketplace</span>
+            <span className="text-xs font-bold text-[var(--color-zxaaa-muted)]">ZXAAA Secure Pay</span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 no-print">
+        <div className="flex gap-4 no-print">
           <button
             onClick={handlePrint}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
-            style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-              color: '#fff',
-            }}
+            className="flex-1 btn-primary py-3 flex items-center justify-center gap-2"
           >
-            <Printer className="w-4 h-4" />
-            Print Receipt
+            <Printer size={18} /> Print Receipt
           </button>
           <button
             onClick={resetScanner}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
-            style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#d1d5db',
-            }}
+            className="flex-1 btn-secondary py-3 flex items-center justify-center gap-2"
           >
-            <RotateCcw className="w-4 h-4" />
-            Scan Another
+            <RotateCcw size={18} /> Scan Another
           </button>
         </div>
       </div>
@@ -196,74 +180,67 @@ const ScanQR = () => {
 
   // ─── SCANNER VIEW ─────────────────────────────────────────────
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="max-w-xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
-          >
-            <ScanLine className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">QR Verification & Generator</h1>
-            <p className="text-xs text-gray-400">
-              Scan buyer codes or generate real high-res scannable QR codes
-            </p>
-          </div>
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-[var(--color-zxaaa-primary-bg)] border border-[var(--color-zxaaa-primary-glow)]">
+          <ScanLine className="w-8 h-8 text-[var(--color-zxaaa-primary)]" />
         </div>
+        <h1 className="text-3xl font-black text-white">QR Verification System</h1>
+        <p className="text-[var(--color-zxaaa-muted)] mt-2">
+          Scan buyer codes during meetup to verify transactions.
+        </p>
       </div>
 
       {/* Mode Tabs */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl glass-panel border border-[var(--color-zxaaa-border)]">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-bg)] max-w-sm mx-auto mb-8">
         <button
           onClick={() => setActiveMode('scan')}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeMode === 'scan'
-              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-600/30'
+              ? 'bg-[var(--color-zxaaa-primary)] text-white shadow-[0_0_12px_var(--color-zxaaa-primary-glow)]'
               : 'text-[var(--color-zxaaa-muted)] hover:text-white'
           }`}
         >
-          <Camera size={15} /> Scan QR Code
+          <Camera size={16} /> Scan Mode
         </button>
         <button
           onClick={() => setActiveMode('generate')}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeMode === 'generate'
-              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-600/30'
+              ? 'bg-[var(--color-zxaaa-primary)] text-white shadow-[0_0_12px_var(--color-zxaaa-primary-glow)]'
               : 'text-[var(--color-zxaaa-muted)] hover:text-white'
           }`}
         >
-          <QrIcon size={15} /> Generate Real QR
+          <QrIcon size={16} /> Dev: Generate
         </button>
       </div>
 
       {/* GENERATE MODE PANEL */}
       {activeMode === 'generate' ? (
-        <div className="space-y-4 animate-fadeIn">
-          <div className="glass-panel p-6 rounded-2xl border border-[var(--color-zxaaa-border)] space-y-4">
+        <div className="space-y-6 animate-fadeIn max-w-sm mx-auto">
+          <div className="p-6 rounded-2xl border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-card)] space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Sparkles size={16} className="text-purple-400" /> Real QR Code Generator
+              <Sparkles size={16} className="text-[var(--color-zxaaa-primary)]" /> Test QR Generator
             </h3>
             
             <div>
-              <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                QR Code Text / Reference Code
+              <label className="block text-xs font-bold text-[var(--color-zxaaa-muted)] mb-2">
+                QR Reference Data
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={genText}
                   onChange={(e) => setGenText(e.target.value)}
-                  placeholder="Enter order reference or custom text"
-                  className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-purple-500"
+                  placeholder="ZX-TXN-..."
+                  className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)]"
                 />
                 <button
                   onClick={() => setGenText('ZX-TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase())}
-                  className="px-3 py-2.5 rounded-xl text-xs font-bold text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all shrink-0"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-primary-bg)] border border-[var(--color-zxaaa-primary-glow)] hover:bg-[var(--color-zxaaa-primary)] hover:text-white transition-colors shrink-0"
                 >
-                  New Random
+                  Random
                 </button>
               </div>
             </div>
@@ -271,54 +248,42 @@ const ScanQR = () => {
 
           <RealQRCode 
             value={genText || 'ZX-TXN-DEMO'}
-            title="Real Scannable QR Code"
-            subtitle="Scan using any phone camera or the ZXAAA scanner tab"
+            title="Dev QR Code"
+            subtitle="Use this to test the scanner"
           />
         </div>
       ) : (
-        <>
+        <div className="space-y-6">
 
       {/* Error Banner */}
       {verifyResult && !verifyResult.success && (
-        <div
-          className="flex items-center gap-3 p-4 rounded-xl mb-5 animate-fadeIn"
-          style={{
-            background: 'rgba(239,68,68,0.1)',
-            border: '1px solid rgba(239,68,68,0.3)',
-          }}
-        >
-          <XCircle className="w-5 h-5 text-red-400 shrink-0" />
+        <div className="flex items-center gap-4 p-5 rounded-[16px] animate-fadeIn bg-red-500/10 border border-red-500/30">
+          <XCircle className="w-8 h-8 text-red-500 shrink-0" />
           <div>
-            <p className="text-red-300 text-sm font-semibold">Verification Failed</p>
-            <p className="text-red-400/80 text-xs mt-0.5">{verifyResult.message}</p>
+            <p className="text-red-400 text-sm font-bold">Verification Failed</p>
+            <p className="text-red-300 text-xs mt-1 font-semibold">{verifyResult.message}</p>
           </div>
           <button
             onClick={resetScanner}
-            className="ml-auto text-red-400 hover:text-red-300"
+            className="ml-auto w-10 h-10 rounded-full flex items-center justify-center bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw size={18} />
           </button>
         </div>
       )}
 
       {/* Camera Scanner */}
-      <div
-        className="rounded-2xl overflow-hidden mb-5"
-        style={{
-          background: 'linear-gradient(135deg, rgba(30,30,50,0.95), rgba(20,20,35,0.95))',
-          border: '1px solid rgba(139,92,246,0.2)',
-          boxShadow: '0 0 30px rgba(139,92,246,0.06)',
-        }}
-      >
-        <div className="p-4 border-b border-gray-700/40 flex items-center justify-between">
+      <div className="rounded-[24px] overflow-hidden bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] shadow-xl relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-zxaaa-border)] z-10" />
+        
+        <div className="p-5 border-b border-[var(--color-zxaaa-border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Camera className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-semibold text-gray-200">Camera Scanner</span>
+            <Camera className="w-5 h-5 text-[var(--color-zxaaa-muted)]" />
+            <span className="text-sm font-bold text-white">Camera Viewfinder</span>
           </div>
           {isScanning && (
-            <span className="flex items-center gap-1.5 text-xs text-green-400">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              Active
+            <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Scanning
             </span>
           )}
         </div>
@@ -328,70 +293,49 @@ const ScanQR = () => {
           <div
             id={SCANNER_ELEMENT_ID}
             className="w-full"
-            style={{ minHeight: isScanning ? '300px' : '0', background: '#0a0a14' }}
+            style={{ minHeight: isScanning ? '350px' : '0', background: 'var(--color-zxaaa-bg)' }}
           />
 
           {/* Placeholder when not scanning */}
           {!isScanning && (
-            <div className="flex flex-col items-center justify-center py-12 px-6">
+            <div className="flex flex-col items-center justify-center py-16 px-6">
               {cameraAvailable ? (
                 <>
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-                    style={{ background: 'rgba(139,92,246,0.12)' }}
-                  >
-                    <Camera className="w-8 h-8 text-purple-400" />
+                  <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-6 bg-[var(--color-zxaaa-primary-bg)] border border-[var(--color-zxaaa-primary-glow)] shadow-[0_0_20px_var(--color-zxaaa-primary-glow)]">
+                    <Camera className="w-10 h-10 text-[var(--color-zxaaa-primary)]" />
                   </div>
-                  <p className="text-gray-300 text-sm mb-1 font-medium">
-                    Ready to scan
-                  </p>
-                  <p className="text-gray-500 text-xs mb-5">
-                    Position the QR code within the camera frame
+                  <h3 className="text-white font-bold mb-2 text-lg">Scanner Ready</h3>
+                  <p className="text-[var(--color-zxaaa-muted)] text-sm mb-8 text-center max-w-xs">
+                    Position the buyer's QR code clearly within the camera frame to verify.
                   </p>
                 </>
               ) : (
                 <>
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-                    style={{ background: 'rgba(239,68,68,0.12)' }}
-                  >
-                    <CameraOff className="w-8 h-8 text-red-400" />
+                  <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-6 bg-red-500/10 border border-red-500/30">
+                    <CameraOff className="w-10 h-10 text-red-400" />
                   </div>
-                  <p className="text-gray-300 text-sm mb-1 font-medium">
-                    Camera unavailable
-                  </p>
-                  <p className="text-gray-500 text-xs mb-5">
-                    {cameraError || 'Grant camera permission or use manual entry below'}
+                  <h3 className="text-white font-bold mb-2 text-lg">Camera Unavailable</h3>
+                  <p className="text-[var(--color-zxaaa-muted)] text-sm mb-8 text-center max-w-xs">
+                    {cameraError || 'Please allow camera permissions or use manual entry.'}
                   </p>
                 </>
               )}
               <button
                 onClick={startScanner}
                 disabled={!cameraAvailable || verifying}
-                className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{
-                  background: cameraAvailable
-                    ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
-                    : 'rgba(255,255,255,0.06)',
-                  color: '#fff',
-                }}
+                className="btn-primary px-8 py-3.5 text-sm"
               >
-                {cameraAvailable ? 'Start Camera' : 'Camera Not Found'}
+                {cameraAvailable ? 'Activate Camera' : 'Camera Not Found'}
               </button>
             </div>
           )}
         </div>
 
         {isScanning && (
-          <div className="p-3 flex justify-center">
+          <div className="p-4 border-t border-[var(--color-zxaaa-border)] flex justify-center bg-[var(--color-zxaaa-card)] relative z-10">
             <button
               onClick={stopScanner}
-              className="px-5 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{
-                background: 'rgba(239,68,68,0.12)',
-                color: '#f87171',
-                border: '1px solid rgba(239,68,68,0.25)',
-              }}
+              className="px-6 py-2.5 rounded-xl text-sm font-bold bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500 hover:text-white transition-colors"
             >
               Stop Camera
             </button>
@@ -400,63 +344,39 @@ const ScanQR = () => {
       </div>
 
       {/* Manual Fallback */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, rgba(30,30,50,0.95), rgba(20,20,35,0.95))',
-          border: '1px solid rgba(139,92,246,0.15)',
-        }}
-      >
+      <div className="rounded-[20px] overflow-hidden bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)]">
         <button
           onClick={() => setShowManual(!showManual)}
-          className="w-full p-4 flex items-center justify-between text-left"
+          className="w-full p-5 flex items-center justify-between text-left hover:bg-[var(--color-zxaaa-bg)] transition-colors"
         >
-          <div className="flex items-center gap-2">
-            <Keyboard className="w-4 h-4 text-blue-400" />
-            <span className="text-sm font-semibold text-gray-200">
-              Manual QR Reference Entry
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] flex items-center justify-center">
+               <Keyboard className="w-4 h-4 text-[var(--color-zxaaa-muted)]" />
+            </div>
+            <span className="text-sm font-bold text-white">Manual Reference Entry</span>
           </div>
-          <span
-            className="text-gray-500 text-xs transition-transform duration-200"
-            style={{ transform: showManual ? 'rotate(180deg)' : 'none' }}
-          >
-            ▼
-          </span>
+          <span className={`text-[var(--color-zxaaa-muted)] transition-transform duration-300 ${showManual ? 'rotate-180' : ''}`}>▼</span>
         </button>
 
         {showManual && (
-          <form onSubmit={handleManualSubmit} className="px-4 pb-4 animate-fadeIn">
-            <p className="text-xs text-gray-500 mb-3">
-              If the camera is not available, enter the QR reference code printed below
-              the buyer's QR code (e.g. <code className="text-purple-400">ZX-TXN-A1B2C3D4</code>).
+          <form onSubmit={handleManualSubmit} className="p-5 pt-0 border-t border-[var(--color-zxaaa-border)] mt-2">
+            <p className="text-xs font-bold text-[var(--color-zxaaa-muted)] mb-4 mt-4">
+              If scanning fails, enter the reference code printed below the QR code.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <input
                 type="text"
                 value={manualRef}
                 onChange={(e) => setManualRef(e.target.value)}
-                placeholder="ZX-TXN-XXXXXXXX"
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
+                placeholder="e.g. ZX-TXN-..."
+                className="flex-1 px-4 py-3 rounded-xl text-sm font-mono text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)]"
               />
               <button
                 type="submit"
                 disabled={verifying || !manualRef.trim()}
-                className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                style={{
-                  background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-                  color: '#fff',
-                }}
+                className="btn-primary px-6 py-3 flex items-center gap-2"
               >
-                {verifying ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <ShieldCheck className="w-4 h-4" />
-                )}
+                {verifying ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
                 Verify
               </button>
             </div>
@@ -466,21 +386,17 @@ const ScanQR = () => {
 
       {/* Loading overlay */}
       {verifying && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-          <div
-            className="rounded-2xl p-8 flex flex-col items-center gap-4"
-            style={{
-              background: 'rgba(20,20,35,0.98)',
-              border: '1px solid rgba(139,92,246,0.3)',
-            }}
-          >
-            <Loader2 className="w-10 h-10 text-purple-400 animate-spin" />
-            <p className="text-gray-200 font-medium">Verifying transaction...</p>
-            <p className="text-gray-500 text-xs">Please wait while we validate</p>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="rounded-[24px] p-10 flex flex-col items-center gap-5 bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-primary-glow)] shadow-[0_0_40px_var(--color-zxaaa-primary-glow)]">
+            <Loader2 size={48} className="text-[var(--color-zxaaa-primary)] animate-spin" />
+            <div className="text-center">
+               <p className="text-xl font-black text-white">Verifying...</p>
+               <p className="text-[var(--color-zxaaa-muted)] text-sm font-bold mt-1">Checking secure database</p>
+            </div>
           </div>
         </div>
       )}
-      </>
+      </div>
       )}
 
       {/* Print-only styles */}
@@ -504,13 +420,13 @@ const ScanQR = () => {
 // Small receipt row component
 const ReceiptRow = ({ icon, label, value, highlight }) => (
   <div className="flex items-center justify-between">
-    <div className="flex items-center gap-2 text-gray-400">
+    <div className="flex items-center gap-2 text-[var(--color-zxaaa-muted)]">
       {icon}
-      <span className="text-xs">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
     </div>
     <span
-      className={`text-sm font-medium ${
-        highlight ? 'text-green-400' : 'text-gray-200'
+      className={`text-sm font-black ${
+        highlight ? 'text-[var(--color-zxaaa-primary)]' : 'text-white'
       }`}
     >
       {value}

@@ -20,178 +20,162 @@ import Messages from './pages/Messages';
 import AdminDashboard from './pages/AdminDashboard';
 import ScanQR from './pages/ScanQR';
 import Notifications from './pages/Notifications';
+
+// New Pages & Components
+import SavedItems from './pages/SavedItems';
+import Orders from './pages/Orders';
+import Wallet from './pages/Wallet';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+
 import {
   Home as HomeIcon, Search, Tag, RefreshCw, MessageSquare, QrCode,
-  Shield, LogOut, MapPin, ChevronDown, Menu, X, User as UserIcon,
-  Bell, Plus,
+  Shield, LogOut, MapPin, ChevronDown, User as UserIcon,
+  Bell, Plus, Heart, ListOrdered, Wallet as WalletIcon, Settings as SettingsIcon,
+  Smartphone, Laptop, Bike, BookOpen, Shirt, Tv, Watch, Activity, MoreHorizontal, ShoppingBag
 } from 'lucide-react';
 
-// ── Nav Item ────────────────────────────────────────────────────────
-function NavItem({ to, icon, label, badge }) {
-  return (
-    <NavLink
-      to={to}
-      end={to === '/'}
-      className={({ isActive }) =>
-        `flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
-          isActive ? 'nav-active' : 'text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/[0.04]'
-        }`
-      }
-    >
-      <span className="shrink-0">{icon}</span>
-      <span className="flex-1">{label}</span>
-      {badge && (
-        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
-          style={{ background: 'rgba(124,58,237,0.8)', color: 'white' }}>
-          {badge}
-        </span>
-      )}
-    </NavLink>
-  );
-}
+const CATEGORIES = [
+  { name: 'Mobiles', icon: <Smartphone size={16} /> },
+  { name: 'Laptops', icon: <Laptop size={16} /> },
+  { name: 'Bikes', icon: <Bike size={16} /> },
+  { name: 'Furniture', icon: <ShoppingBag size={16} /> },
+  { name: 'Books & Study', icon: <BookOpen size={16} /> },
+  { name: 'Clothes', icon: <Shirt size={16} /> },
+  { name: 'Electronics', icon: <Tv size={16} /> },
+  { name: 'Home Appliances', icon: <ShoppingBag size={16} /> },
+  { name: 'Watches', icon: <Watch size={16} /> },
+  { name: 'Sports', icon: <Activity size={16} /> },
+  { name: 'Accessories', icon: <ShoppingBag size={16} /> },
+  { name: 'More', icon: <MoreHorizontal size={16} /> }
+];
 
-// ── Main Layout ─────────────────────────────────────────────────────
-function MainLayout() {
+function TopNavbar({ setLocationModalOpen }) {
   const { user, logout } = useAuth();
-  const { selectedLocation, radiusKm } = useLocationContext();
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const { selectedLocation } = useLocationContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQ, setSearchQ] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const isAuthPage = ['/login', '/register'].includes(location.pathname);
-
-  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-
-  useEffect(() => {
-    if (!user) {
-      setUnreadNotifCount(0);
-      return;
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQ.trim()) {
+      navigate(`/explore?search=${encodeURIComponent(searchQ)}`);
     }
-    const fetchUnread = async () => {
-      try {
-        const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const { data } = await axios.get('http://localhost:5000/api/notifications', config);
-        setUnreadNotifCount(data.unreadCount || 0);
-      } catch (err) {
-        console.error('Fetch unread count error:', err);
-      }
-    };
-    fetchUnread();
-  }, [user, location.pathname]);
+  };
 
   const handleLogout = () => {
     logout();
     setDropdownOpen(false);
-    setMobileMenuOpen(false);
     navigate('/login');
   };
 
-  const NAV_LINKS = [
-    { to: '/',               icon: <HomeIcon size={18} />,      label: 'Home' },
-    { to: '/explore',        icon: <Search size={18} />,        label: 'Explore' },
-    { to: '/notifications',  icon: <Bell size={18} />,          label: 'Notifications', badge: unreadNotifCount > 0 ? String(unreadNotifCount) : null },
-    { to: '/sell',           icon: <Tag size={18} />,           label: 'Sell Product' },
-    { to: '/swap',           icon: <RefreshCw size={18} />,     label: 'Swap Center', badge: 'NEW' },
-    { to: '/messages',       icon: <MessageSquare size={18} />, label: 'Messages' },
-    { to: '/seller/scan-qr', icon: <QrCode size={18} />,       label: 'Scan QR' },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-zxaaa-bg)' }}>
-
-      {/* ── TOPBAR ── */}
-      <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 md:px-6 shrink-0"
-        style={{ background: 'rgba(8,9,13,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(30,33,48,0.8)' }}>
-
-        {/* Left: Logo + mobile menu */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMobileMenuOpen(m => !m)}
-            className="md:hidden p-2 rounded-lg text-[var(--color-zxaaa-muted)] hover:text-white transition-colors"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-          <Logo size="sm" />
+    <header className="sticky top-0 z-40 w-full glass-panel border-b border-[var(--color-zxaaa-border)]">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+        {/* Left: Logo & Location */}
+        <div className="flex items-center gap-6">
+          <Link to="/" className="shrink-0 flex items-center">
+             <Logo size="md" />
+          </Link>
+          <div className="hidden md:flex items-center">
+            <button
+              onClick={() => setLocationModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+              <MapPin size={16} className="text-[var(--color-zxaaa-primary)]" />
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Location</span>
+                <span className="truncate max-w-[150px]">{selectedLocation.name.split(',')[0]} (5km)</span>
+              </div>
+              <ChevronDown size={14} className="ml-1 opacity-70" />
+            </button>
+          </div>
         </div>
 
-        {/* Center: Location pill */}
-        <button
-          onClick={() => setLocationModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:scale-[1.02]"
-          style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
-          <MapPin size={13} className="text-purple-400" />
-          <span className="hidden sm:inline max-w-[120px] truncate">{selectedLocation.name.split(',')[0]}</span>
-          <span className="text-purple-400 text-[10px] font-bold">{radiusKm}km</span>
-          <ChevronDown size={12} className="text-[var(--color-zxaaa-muted)]" />
-        </button>
+        {/* Center: Search */}
+        <div className="flex-1 max-w-2xl hidden md:block">
+          <form onSubmit={handleSearchSubmit} className="relative w-full">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-zxaaa-muted)]" />
+            <input
+              type="text"
+              value={searchQ}
+              onChange={e => setSearchQ(e.target.value)}
+              placeholder="Search products, brands or categories..."
+              className="w-full text-sm text-white pl-12 pr-4 py-2.5 rounded-full focus:outline-none transition-all bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] focus:border-[var(--color-zxaaa-primary)] focus:shadow-[0_0_0_1px_var(--color-zxaaa-primary-bg)]"
+            />
+          </form>
+        </div>
 
-        {/* Right: actions */}
-        <div className="flex items-center gap-2">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3 shrink-0">
           <ThemeSwitcher />
 
-          <Link to="/notifications"
-            className="p-2 rounded-xl text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/[0.05] transition-all relative"
-            title="Notifications"
-            style={{ border: '1px solid var(--color-zxaaa-border)' }}>
-            <Bell size={16} />
-            {unreadNotifCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center border border-black animate-pulse">
-                {unreadNotifCount}
-              </span>
-            )}
-          </Link>
-
-          <Link to="/sell"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}>
-            <Plus size={14} /> List Item
-          </Link>
+          {user && (
+            <>
+              <Link to="/messages" title="Messages" className="hidden md:flex relative p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+                <MessageSquare size={20} />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--color-zxaaa-primary)]"></span>
+              </Link>
+              <Link to="/notifications" title="Notifications" className="hidden md:flex relative p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+                <Bell size={20} />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              </Link>
+              <Link to="/seller/scan-qr" title="Scan QR" className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-[var(--color-zxaaa-primary)] border border-[var(--color-zxaaa-primary-glow)] bg-[var(--color-zxaaa-primary-bg)] hover:bg-[var(--color-zxaaa-primary)] hover:text-white">
+                <QrCode size={16} /> Scan QR
+              </Link>
+              <Link to="/saved-items" title="Saved" className="hidden md:flex p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+                <Heart size={20} />
+              </Link>
+            </>
+          )}
 
           {user ? (
-            <div className="relative">
+            <div className="relative ml-2">
               <button
-                onClick={() => setDropdownOpen(d => !d)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl transition-all hover:bg-white/[0.05]"
-                style={{ border: '1px solid var(--color-zxaaa-border)' }}>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}>
-                  {user.name?.charAt(0).toUpperCase() || 'U'}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-[var(--color-zxaaa-border)] hover:bg-white/5 transition-all">
+                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white bg-[var(--color-zxaaa-primary)] shrink-0">
+                  {user.profileImage ? (
+                    <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                  ) : (
+                    user.name?.charAt(0).toUpperCase() || 'U'
+                  )}
                 </div>
-                <span className="text-xs font-semibold text-white hidden sm:block max-w-[80px] truncate">{user.name}</span>
-                <ChevronDown size={12} className="text-[var(--color-zxaaa-muted)] hidden sm:block" />
+                <span className="text-sm font-semibold hidden md:block max-w-[100px] truncate">{user.name?.split(' ')[0]}</span>
+                <ChevronDown size={14} className="text-[var(--color-zxaaa-muted)] hidden md:block" />
               </button>
 
               {dropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-52 z-50 rounded-2xl overflow-hidden animate-fadeIn"
-                    style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)', boxShadow: '0 16px 48px rgba(0,0,0,0.6)' }}>
-                    <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--color-zxaaa-border)' }}>
-                      <p className="text-sm font-bold text-white">{user.name}</p>
-                      <p className="text-[11px] text-[var(--color-zxaaa-muted)]">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-56 z-50 rounded-2xl bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] shadow-xl animate-fadeIn overflow-hidden">
+                    <div className="px-4 py-3 border-b border-[var(--color-zxaaa-border)]">
+                      <p className="text-sm font-bold text-white truncate">{user.name}</p>
+                      <p className="text-xs text-[var(--color-zxaaa-muted)] truncate">{user.email}</p>
                       {user.role === 'admin' && (
-                        <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded-full"
-                          style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd', border: '1px solid rgba(124,58,237,0.3)' }}>
+                        <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--color-zxaaa-primary-bg)] text-[var(--color-zxaaa-primary)]">
                           ADMIN
                         </span>
                       )}
                     </div>
-                    <div className="p-1.5">
-                      <Link to="/sell" onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/[0.04] rounded-xl">
-                        <UserIcon size={14} /> My Listings
+                    <div className="p-2 space-y-1">
+                      <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                        <UserIcon size={16} /> Profile
+                      </Link>
+                      <Link to="/orders" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                        <ListOrdered size={16} /> My Orders
+                      </Link>
+                      <Link to="/wallet" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                        <WalletIcon size={16} /> Wallet
                       </Link>
                       {user.role === 'admin' && (
-                        <Link to="/admin" onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/[0.04] rounded-xl">
-                          <Shield size={14} /> Admin Panel
+                        <Link to="/admin" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                          <Shield size={16} /> Admin Dashboard
                         </Link>
                       )}
-                      <button onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 rounded-xl font-semibold">
-                        <LogOut size={14} /> Sign Out
+                      <div className="h-px bg-[var(--color-zxaaa-border)] my-1" />
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl font-semibold transition-colors">
+                        <LogOut size={16} /> Sign Out
                       </button>
                     </div>
                   </div>
@@ -199,91 +183,107 @@ function MainLayout() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="text-xs font-semibold px-3 py-1.5 rounded-xl text-white transition-all hover:bg-white/[0.05]"
-                style={{ border: '1px solid var(--color-zxaaa-border)' }}>
+            <div className="flex items-center gap-3 ml-2">
+              <Link to="/login" className="text-sm font-semibold text-white hover:text-[var(--color-zxaaa-primary)] transition-colors hidden sm:block">
                 Sign In
               </Link>
-              <Link to="/register" className="text-xs font-bold px-3 py-1.5 rounded-xl text-white transition-all hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}>
+              <Link to="/register" className="btn-primary px-4 py-2 text-sm">
                 Sign Up
               </Link>
             </div>
           )}
         </div>
-      </header>
-
-      {/* ── BODY ── */}
-      <div className="flex flex-1 min-h-0">
-
-        {/* ── LEFT SIDEBAR ── */}
-        <aside
-          className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col shrink-0`}
-          style={{ width: 220, borderRight: '1px solid rgba(30,33,48,0.8)', background: 'rgba(8,9,13,0.95)', paddingTop: 8 }}>
-
-          {/* Nav */}
-          <nav className="px-3 space-y-0.5 flex-1">
-            {NAV_LINKS.map(item => (
-              <NavItem key={item.to} {...item} />
-            ))}
-            {user?.role === 'admin' && (
-              <NavItem to="/admin" icon={<Shield size={18} />} label="Admin Panel" />
-            )}
-          </nav>
-
-          {/* Bottom user section */}
-          <div className="px-3 pb-4 pt-4" style={{ borderTop: '1px solid rgba(30,33,48,0.8)' }}>
-            {user ? (
-              <div className="p-3 rounded-xl" style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}>
-                    {user.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-xs font-bold text-white truncate">{user.name}</p>
-                    <p className="text-[10px] text-[var(--color-zxaaa-muted)] truncate">{user.email}</p>
-                  </div>
-                </div>
-                <button onClick={handleLogout}
-                  className="w-full py-1.5 px-2 rounded-lg text-[11px] font-semibold text-red-400 flex items-center justify-center gap-1.5 transition-colors hover:bg-red-500/10"
-                  style={{ border: '1px solid rgba(239,68,68,0.2)' }}>
-                  <LogOut size={12} /> Sign Out
-                </button>
-              </div>
-            ) : (
-              <Link to="/login"
-                className="block w-full py-2 text-center rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}>
-                Sign In
-              </Link>
-            )}
-          </div>
-        </aside>
-
-        {/* ── PAGE CONTENT ── */}
-        <main className="flex-1 min-w-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
-          <div className="p-4 md:p-6 max-w-[1400px] mx-auto">
-            <Routes>
-              <Route path="/"               element={<Home />} />
-              <Route path="/explore"        element={<Explore />} />
-              <Route path="/notifications"  element={<Notifications />} />
-              <Route path="/product/:id"    element={<ProductDetail />} />
-              <Route path="/sell"           element={<ProtectedRoute><Sell /></ProtectedRoute>} />
-              <Route path="/swap"           element={<SwapCenter />} />
-              <Route path="/messages"       element={<Messages />} />
-              <Route path="/admin"          element={<AdminDashboard />} />
-              <Route path="/login"          element={<Login />} />
-              <Route path="/register"       element={<Register />} />
-              <Route path="/seller/scan-qr" element={<ProtectedRoute><ScanQR /></ProtectedRoute>} />
-            </Routes>
-          </div>
-        </main>
       </div>
+    </header>
+  );
+}
 
-      {/* ── MOBILE OVERLAY ── */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+function CategoryBar() {
+  return (
+    <div className="hidden md:block w-full bg-[var(--color-zxaaa-card2)] border-b border-[var(--color-zxaaa-border)]">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+        <div className="flex items-center gap-6 overflow-x-auto py-3 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
+          {CATEGORIES.map((cat, i) => (
+            <Link key={i} to={`/explore?category=${encodeURIComponent(cat.name)}`} className="flex items-center gap-2 text-sm font-medium text-[var(--color-zxaaa-muted)] hover:text-white transition-colors shrink-0">
+              {cat.icon}
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MainLayout() {
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const location = useLocation();
+  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[var(--color-zxaaa-bg)] text-[var(--color-zxaaa-text)]">
+      {!isAuthPage && <TopNavbar setLocationModalOpen={setLocationModalOpen} />}
+      {!isAuthPage && <CategoryBar />}
+
+      <main className="flex-1 w-full max-w-[1600px] mx-auto pb-20 md:pb-8">
+        <Routes>
+          <Route path="/"               element={<Home />} />
+          <Route path="/explore"        element={<Explore />} />
+          <Route path="/notifications"  element={<Notifications />} />
+          <Route path="/product/:id"    element={<ProductDetail />} />
+          <Route path="/sell"           element={<ProtectedRoute><Sell /></ProtectedRoute>} />
+          <Route path="/swap"           element={<SwapCenter />} />
+          <Route path="/messages"       element={<Messages />} />
+          <Route path="/admin"          element={<AdminDashboard />} />
+          <Route path="/login"          element={<Login />} />
+          <Route path="/register"       element={<Register />} />
+          <Route path="/seller/scan-qr" element={<ProtectedRoute><ScanQR /></ProtectedRoute>} />
+          <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/saved-items"    element={<ProtectedRoute><SavedItems /></ProtectedRoute>} />
+          <Route path="/orders"         element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/wallet"         element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+          <Route path="/settings"       element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        </Routes>
+      </main>
+
+      {!isAuthPage && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-zxaaa-border)] flex items-center justify-around h-16 pb-safe"
+          style={{ background: 'var(--color-zxaaa-card)', backdropFilter: 'blur(20px)' }}>
+          <NavLink to="/" end className={({ isActive }) => `flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-bold transition-colors ${isActive ? 'text-[var(--color-zxaaa-primary)]' : 'text-[var(--color-zxaaa-muted)]'}`}>
+            <HomeIcon size={22} />
+            Home
+          </NavLink>
+          <NavLink to="/explore" className={({ isActive }) => `flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-bold transition-colors ${isActive ? 'text-[var(--color-zxaaa-primary)]' : 'text-[var(--color-zxaaa-muted)]'}`}>
+            <Search size={22} />
+            Explore
+          </NavLink>
+          {/* Center Sell FAB */}
+          <Link to="/sell" className="relative -top-5 w-14 h-14 rounded-full text-white flex items-center justify-center hover:scale-105 transition-transform shadow-[0_6px_20px_var(--color-zxaaa-primary-glow)]" style={{ background: 'var(--color-zxaaa-primary)' }}>
+            <Plus size={26} />
+          </Link>
+          <NavLink to="/notifications" className={({ isActive }) => `relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-bold transition-colors ${isActive ? 'text-[var(--color-zxaaa-primary)]' : 'text-[var(--color-zxaaa-muted)]'}`}>
+            <div className="relative">
+              <Bell size={22} />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400" />
+            </div>
+            Alerts
+          </NavLink>
+          <NavLink to="/messages" className={({ isActive }) => `relative flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-bold transition-colors ${isActive ? 'text-[var(--color-zxaaa-primary)]' : 'text-[var(--color-zxaaa-muted)]'}`}>
+            <div className="relative">
+              <MessageSquare size={22} />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--color-zxaaa-primary)]" />
+            </div>
+            Chat
+          </NavLink>
+          <NavLink to="/seller/scan-qr" className={({ isActive }) => `flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-bold transition-colors ${isActive ? 'text-[var(--color-zxaaa-primary)]' : 'text-[var(--color-zxaaa-muted)]'}`}>
+            <QrCode size={20} />
+            Scan
+          </NavLink>
+          <NavLink to="/profile" className={({ isActive }) => `flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-bold transition-colors ${isActive ? 'text-[var(--color-zxaaa-primary)]' : 'text-[var(--color-zxaaa-muted)]'}`}>
+            <UserIcon size={20} />
+            Profile
+          </NavLink>
+        </div>
       )}
 
       <LocationModal isOpen={locationModalOpen} onClose={() => setLocationModalOpen(false)} />
@@ -306,3 +306,4 @@ function App() {
 }
 
 export default App;
+
