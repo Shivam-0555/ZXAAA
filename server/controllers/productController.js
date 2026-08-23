@@ -11,7 +11,7 @@ export const getProducts = async (req, res) => {
       city
     } = req.query;
 
-    let query = { status: 'ACTIVE' };
+    let query = { status: { $in: ['ACTIVE', 'RESERVED', 'SOLD'] } };
 
     if (keyword) {
       query.$text = { $search: keyword };

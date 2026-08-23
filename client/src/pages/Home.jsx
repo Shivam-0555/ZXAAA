@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useLocationContext } from '../context/LocationContext';
 import { useAuth } from '../context/AuthContext';
 import HowItWorksModal from '../components/HowItWorksModal';
+import Logo from '../components/Logo';
 import ProductCard, { ProductCardSkeleton } from '../components/ProductCard';
 import {
   Search, Plus, RefreshCw, QrCode, ArrowRight, Sparkles, MapPin, Package, ShieldCheck, CheckCircle2, MessageSquare, Repeat
@@ -157,41 +158,50 @@ export default function Home() {
   }, []);
 
   // Derived sections
-  const availableProducts = products.filter(p => p.status === 'AVAILABLE');
-  
-  // 1. Recently Added (sorted by createdAt)
-  const recentlyAdded = [...availableProducts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 4);
-  
-  // 2. Available for Swap
-  const swapAvailable = availableProducts.filter(p => p.isSwapEnabled).slice(0, 4);
-  
-  // 3. Best Deals (could be lowest price, here we'll just slice some for demo logic)
-  const bestDeals = [...availableProducts].sort((a, b) => a.price - b.price).slice(0, 4);
+  const availableProducts = products.filter(p => p.status === 'ACTIVE' || p.status === 'RESERVED' || p.status === 'SOLD');
+
+  // 1. Recently Added (sorted by createdAt, ACTIVE items first)
+  const recentlyAdded = [...availableProducts]
+    .sort((a, b) => {
+      // ACTIVE items appear before RESERVED/SOLD
+      const statusOrder = { ACTIVE: 0, RESERVED: 1, SOLD: 2 };
+      const sA = statusOrder[a.status] ?? 3;
+      const sB = statusOrder[b.status] ?? 3;
+      if (sA !== sB) return sA - sB;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    })
+    .slice(0, 8);
+
+  // 2. Available for Swap (only ACTIVE)
+  const swapAvailable = availableProducts.filter(p => p.isSwapEnabled && p.status === 'ACTIVE').slice(0, 4);
+
+  // 3. Best Deals (ACTIVE only sorted by price)
+  const bestDeals = availableProducts.filter(p => p.status === 'ACTIVE').sort((a, b) => a.price - b.price).slice(0, 4);
 
   return (
     <div className="space-y-12">
       {/* ──────────────── 1. TOP HERO BANNER ──────────────── */}
-      <div className="relative overflow-hidden rounded-[24px] hero-gradient border border-[var(--color-zxaaa-border)] p-7 md:p-12 mt-4 shadow-xl">
+      <div className="relative overflow-hidden rounded-[24px] p-7 md:p-12 mt-4 shadow-sm" style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
-          <div className="max-w-xl text-center lg:text-left">
+          <div className="max-w-2xl text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold mb-6 uppercase tracking-wider"
               style={{ background: 'var(--color-zxaaa-primary-bg)', border: '1px solid var(--color-zxaaa-primary-glow)', color: 'var(--color-zxaaa-text)' }}>
               <Sparkles size={14} className="text-[var(--color-zxaaa-primary)]" />
-              Verified Local Marketplace
+              ZXAAA Marketplace
             </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] mb-4 text-white">
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] mb-4 text-amber-400">
               Buy. Sell. Swap.
             </h1>
-            <p className="text-3xl md:text-4xl font-extrabold leading-[1.1] mb-6 gradient-text">
+            <p className="text-3xl md:text-4xl font-extrabold leading-[1.1] mb-6 text-[var(--color-zxaaa-primary)]">
               Anything. Anywhere.
             </p>
-            <p className="text-[var(--color-zxaaa-muted)] text-base md:text-lg mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
+            <p className="text-[var(--color-zxaaa-muted)] text-base md:text-lg mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium">
               Find useful products near you, sell what you no longer need, or swap it for something you want.
             </p>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <Link to="/explore" className="btn-primary px-8 py-4 text-sm md:text-base flex items-center gap-2">
+              <Link to="/explore" className="btn-primary px-8 py-4 text-sm md:text-base flex items-center gap-2 shadow-md">
                 Explore Nearby <ArrowRight size={18} />
               </Link>
               <Link to="/sell" className="btn-secondary px-8 py-4 text-sm md:text-base flex items-center gap-2">
@@ -200,9 +210,6 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center justify-center shrink-0 pointer-events-none select-none">
-            <HeroVisual />
-          </div>
         </div>
       </div>
 
@@ -225,7 +232,7 @@ export default function Home() {
                 {act.icon}
               </div>
               <div className="min-w-0">
-                <h4 className="text-sm font-bold text-white leading-tight transition-colors">
+                <h4 className="text-sm font-bold text-[var(--color-zxaaa-text)] leading-tight transition-colors">
                   {act.label}
                 </h4>
                 <p className="text-[11px] text-[var(--color-zxaaa-muted)] font-medium mt-1">
@@ -238,11 +245,11 @@ export default function Home() {
       </div>
 
       {/* ──────────────── 3. DYNAMIC PRODUCT SECTIONS ──────────────── */}
-      
+
       {/* Loading State */}
       {loading && (
         <div>
-          <h2 className="text-2xl font-extrabold text-white mb-6">Loading Products...</h2>
+          <h2 className="text-2xl font-extrabold text-[var(--color-zxaaa-text)] mb-6">Loading Products...</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
@@ -253,7 +260,7 @@ export default function Home() {
       {!loading && availableProducts.length === 0 && (
         <div className="text-center py-20 rounded-3xl" style={{ background: 'var(--color-zxaaa-card)', border: '1px dashed var(--color-zxaaa-border)' }}>
           <Package size={56} className="mx-auto mb-4 text-[var(--color-zxaaa-muted)] opacity-50" />
-          <h3 className="text-2xl font-bold text-white mb-2">No products nearby yet</h3>
+          <h3 className="text-2xl font-bold text-[var(--color-zxaaa-text)] mb-2">No products nearby yet</h3>
           <p className="text-sm text-[var(--color-zxaaa-muted)] max-w-md mx-auto mb-8">
             Be the first to list an item in {cityName} or change your location to explore more.
           </p>
@@ -269,7 +276,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-6">
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-extrabold text-white tracking-tight">Products Near You</h2>
+                <h2 className="text-2xl font-extrabold text-[var(--color-zxaaa-text)] tracking-tight">Products Near You</h2>
                 <span className="text-[11px] font-black px-3 py-1 rounded-full flex items-center gap-1.5"
                   style={{ background: 'rgba(236,72,153,0.12)', border: '1px solid rgba(236,72,153,0.3)', color: '#f472b6' }}>
                   <MapPin size={12} /> {cityName}
@@ -294,7 +301,7 @@ export default function Home() {
         <div>
           <div className="flex justify-between items-end mb-6">
             <div>
-              <h2 className="text-2xl font-extrabold text-white tracking-tight">Available for Swap</h2>
+              <h2 className="text-2xl font-extrabold text-[var(--color-zxaaa-text)] tracking-tight">Available for Swap</h2>
               <p className="text-sm text-[var(--color-zxaaa-muted)] mt-1">Trade your items without spending cash.</p>
             </div>
             <Link to="/explore?swap=true" className="text-sm font-bold text-[var(--color-zxaaa-primary)] hover:underline">
@@ -311,18 +318,18 @@ export default function Home() {
 
       {/* Section: Best Deals (Lowest Prices) */}
       {!loading && bestDeals.length > 0 && bestDeals.length > recentlyAdded.length && (
-         <div>
-         <div className="flex justify-between items-end mb-6">
-           <div>
-             <h2 className="text-2xl font-extrabold text-white tracking-tight">Best Deals Nearby</h2>
-           </div>
-         </div>
-         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-           {bestDeals.map(p => (
-             <ProductCard key={p._id} product={p} />
-           ))}
-         </div>
-       </div>
+        <div>
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <h2 className="text-2xl font-extrabold text-[var(--color-zxaaa-text)] tracking-tight">Best Deals Nearby</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {bestDeals.map(p => (
+              <ProductCard key={p._id} product={p} />
+            ))}
+          </div>
+        </div>
       )}
 
 
@@ -330,16 +337,16 @@ export default function Home() {
       {!swapLoading && swaps.length > 0 && (
         <div className="rounded-[24px] p-8 md:p-10 relative overflow-hidden"
           style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
-          
+
           <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(90deg, var(--color-zxaaa-primary), #10b981)' }} />
-          
+
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full mb-3"
                 style={{ background: 'var(--color-zxaaa-primary-bg)', border: '1px solid var(--color-zxaaa-primary-glow)', color: 'var(--color-zxaaa-text)' }}>
                 <RefreshCw size={12} /> Swap Center
               </div>
-              <h2 className="text-3xl font-extrabold text-white">Swap instead of buying.</h2>
+              <h2 className="text-3xl font-extrabold text-[var(--color-zxaaa-text)]">Swap instead of buying.</h2>
             </div>
             <Link to="/swap" className="btn-secondary px-6 py-2.5 flex items-center gap-2">
               Go to Swap Center <ArrowRight size={16} />
@@ -350,27 +357,27 @@ export default function Home() {
             {swaps.slice(0, 3).map(s => (
               <div key={s._id} className="p-5 rounded-2xl flex flex-col gap-4 relative"
                 style={{ background: 'var(--color-zxaaa-card2)', border: '1px solid var(--color-zxaaa-border)' }}>
-                
-                <div className="flex items-center justify-between">
-                   <div className="flex-1 min-w-0 bg-[var(--color-zxaaa-bg)] p-3 rounded-xl border border-[var(--color-zxaaa-border)]">
-                      <p className="text-[10px] text-[var(--color-zxaaa-muted)] uppercase tracking-wider font-bold mb-1">My Product</p>
-                      <p className="text-sm font-bold text-white truncate">{s.requestedProduct?.title || 'Target Product'}</p>
-                   </div>
-                   
-                   <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10 -mx-3"
-                     style={{ background: 'var(--color-zxaaa-primary-bg)', border: '2px solid var(--color-zxaaa-primary)' }}>
-                     <Repeat size={16} className="text-[var(--color-zxaaa-primary)]" />
-                   </div>
 
-                   <div className="flex-1 min-w-0 bg-[var(--color-zxaaa-bg)] p-3 rounded-xl border border-[var(--color-zxaaa-border)] text-right">
-                      <p className="text-[10px] text-[var(--color-zxaaa-muted)] uppercase tracking-wider font-bold mb-1">Matched</p>
-                      <p className="text-sm font-bold text-white truncate">{s.offeredProduct?.title || 'User Product'}</p>
-                   </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0 bg-[var(--color-zxaaa-bg)] p-3 rounded-xl border border-[var(--color-zxaaa-border)]">
+                    <p className="text-[10px] text-[var(--color-zxaaa-muted)] uppercase tracking-wider font-bold mb-1">My Product</p>
+                    <p className="text-sm font-bold text-[var(--color-zxaaa-text)] truncate">{s.requestedProduct?.title || 'Target Product'}</p>
+                  </div>
+
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10 -mx-3"
+                    style={{ background: 'var(--color-zxaaa-primary-bg)', border: '2px solid var(--color-zxaaa-primary)' }}>
+                    <Repeat size={16} className="text-[var(--color-zxaaa-primary)]" />
+                  </div>
+
+                  <div className="flex-1 min-w-0 bg-[var(--color-zxaaa-bg)] p-3 rounded-xl border border-[var(--color-zxaaa-border)] text-right">
+                    <p className="text-[10px] text-[var(--color-zxaaa-muted)] uppercase tracking-wider font-bold mb-1">Matched</p>
+                    <p className="text-sm font-bold text-[var(--color-zxaaa-text)] truncate">{s.offeredProduct?.title || 'User Product'}</p>
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-[var(--color-zxaaa-muted)] font-medium flex items-center gap-1">
-                    <MapPin size={12}/> 2.4 km away
+                    <MapPin size={12} /> 2.4 km away
                   </span>
                   <Link to={`/swap?id=${s._id}`} className="text-xs font-bold text-[var(--color-zxaaa-primary)] hover:underline">
                     View Swap Details
@@ -384,7 +391,7 @@ export default function Home() {
 
       {/* ──────────────── 5. HOW ZXAAA WORKS ──────────────── */}
       <div>
-        <h2 className="text-2xl font-extrabold text-white tracking-tight mb-6">How ZXAAA Works</h2>
+        <h2 className="text-2xl font-extrabold text-[var(--color-zxaaa-text)] tracking-tight mb-6">How ZXAAA Works</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { num: '01', title: 'Find Nearby', desc: 'Search for products available in your city or neighborhood.', icon: <Search size={24} className="text-[var(--color-zxaaa-primary)]" /> },
@@ -394,12 +401,12 @@ export default function Home() {
           ].map(step => (
             <div key={step.num} className="p-6 rounded-2xl relative"
               style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
-              <span className="text-4xl font-black text-white/5 absolute top-4 right-4">{step.num}</span>
+              <span className="text-4xl font-black text-[var(--color-zxaaa-text)]/5 absolute top-4 right-4">{step.num}</span>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
                 style={{ background: 'var(--color-zxaaa-primary-bg)', border: '1px solid var(--color-zxaaa-primary-glow)' }}>
                 {step.icon}
               </div>
-              <h3 className="text-base font-bold text-white mb-2">{step.title}</h3>
+              <h3 className="text-base font-bold text-[var(--color-zxaaa-text)] mb-2">{step.title}</h3>
               <p className="text-sm text-[var(--color-zxaaa-muted)] leading-relaxed">{step.desc}</p>
             </div>
           ))}

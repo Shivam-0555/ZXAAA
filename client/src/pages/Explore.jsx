@@ -98,7 +98,7 @@ export default function Explore() {
     <div className="space-y-6 pb-12">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-white">Explore Marketplace</h1>
+        <h1 className="text-3xl font-black text-slate-900">Explore Marketplace</h1>
         <p className="text-sm text-[var(--color-zxaaa-muted)] mt-1">
           Discover items near <span className="text-[var(--color-zxaaa-primary)] font-bold">{selectedLocation?.name || 'your location'}</span>
         </p>
@@ -116,14 +116,14 @@ export default function Explore() {
               value={searchQ}
               onChange={e => { setSearchQ(e.target.value); updateSearchParams('search', e.target.value); }}
               placeholder="Search products, brands, or categories..."
-              className="w-full text-sm text-white pl-11 pr-10 py-3 rounded-xl focus:outline-none transition-colors"
+              className="w-full text-sm text-slate-900 pl-11 pr-10 py-3 rounded-xl focus:outline-none transition-colors"
               style={{ background: 'var(--color-zxaaa-bg)', border: '1px solid var(--color-zxaaa-border)' }}
               onFocus={e => e.target.style.borderColor = 'var(--color-zxaaa-primary-glow)'}
               onBlur={e => e.target.style.borderColor = 'var(--color-zxaaa-border)'}
             />
             {searchQ && (
               <button onClick={() => { setSearchQ(''); updateSearchParams('search', null); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-zxaaa-muted)] hover:text-white">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-zxaaa-muted)] hover:text-slate-900">
                 <X size={16} />
               </button>
             )}
@@ -134,7 +134,7 @@ export default function Explore() {
               <select
                 value={sort}
                 onChange={e => setSort(e.target.value)}
-                className="text-sm text-white py-3 pl-9 pr-8 rounded-xl focus:outline-none cursor-pointer appearance-none min-w-[150px]"
+                className="text-sm text-slate-900 py-3 pl-9 pr-8 rounded-xl focus:outline-none cursor-pointer appearance-none min-w-[150px]"
                 style={{ background: 'var(--color-zxaaa-bg)', border: '1px solid var(--color-zxaaa-border)' }}
               >
                 <option value="newest">Sort: Newest</option>
@@ -147,7 +147,7 @@ export default function Explore() {
               className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all shrink-0 border ${
                 swapOnly 
                   ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400' 
-                  : 'border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-bg)] text-[var(--color-zxaaa-muted)] hover:text-white'
+                  : 'border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-bg)] text-[var(--color-zxaaa-muted)] hover:text-slate-900'
               }`}
             >
               <RefreshCw size={16} />

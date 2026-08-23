@@ -17,16 +17,23 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
+      required: function() {
+        return !this.googleId;
+      }
     },
     password: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.googleId;
+      }
     },
     city: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.googleId;
+      }
     },
     location: {
       type: {
@@ -91,6 +98,17 @@ const userSchema = new mongoose.Schema(
     walletPoints: {
       type: Number,
       default: 0,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    otp: {
+      type: String,
+    },
+    otpExpires: {
+      type: Date,
     },
   },
   {

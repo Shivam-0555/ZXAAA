@@ -16,6 +16,10 @@ export function ThemeProvider({ children }) {
     return localStorage.getItem('zxaaa-theme') || 'neon-violet';
   });
 
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('zxaaa-mode') === 'dark';
+  });
+
   const theme = THEMES.find(t => t.id === themeId) || THEMES[0];
 
   useEffect(() => {
@@ -24,16 +28,26 @@ export function ThemeProvider({ children }) {
       if (t.className) document.body.classList.remove(t.className);
     });
     
-    // Add active theme class
+    // Add active color theme class
     if (theme.className) {
       document.body.classList.add(theme.className);
     }
+
+    // Toggle dark class for background and text white/black behavior
+    if (isDark) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
     
     localStorage.setItem('zxaaa-theme', themeId);
-  }, [themeId, theme]);
+    localStorage.setItem('zxaaa-mode', isDark ? 'dark' : 'light');
+  }, [themeId, theme, isDark]);
+
+  const toggleDarkMode = () => setIsDark(prev => !prev);
 
   return (
-    <ThemeContext.Provider value={{ themeId, setThemeId, theme, themes: THEMES }}>
+    <ThemeContext.Provider value={{ themeId, setThemeId, theme, themes: THEMES, isDark, toggleDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

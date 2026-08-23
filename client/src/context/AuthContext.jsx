@@ -44,13 +44,44 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (token) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/google`, { token });
+      setUser(data.data);
+      localStorage.setItem('userInfo', JSON.stringify(data.data));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Google Login failed' };
+    }
+  };
+
+  const requestOtp = async (identifier) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/request-otp`, { identifier });
+      return { success: true, message: data.message, devOtp: data.devOtp };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to request OTP' };
+    }
+  };
+
+  const verifyOtpLogin = async (identifier, otp) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/verify-otp-login`, { identifier, otp });
+      setUser(data.data);
+      localStorage.setItem('userInfo', JSON.stringify(data.data));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Invalid OTP' };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('userInfo');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, googleLogin, requestOtp, verifyOtpLogin, loading }}>
       {children}
     </AuthContext.Provider>
   );

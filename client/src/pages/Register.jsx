@@ -32,13 +32,27 @@ const Register = () => {
       return setError('Passwords do not match');
     }
     
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      return setError('Please enter a valid email address');
+    }
+    
+    const cleanedPhone = formData.phone.replace(/^(\+91|91)/, '').replace(/[\s\-]/g, '');
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(cleanedPhone)) {
+      return setError('Please enter a valid 10-digit mobile number');
+    }
+
+    
     setLoading(true);
     
     const res = await register({
       ...formData,
+      phone: cleanedPhone,
       latitude: 22.3072,
       longitude: 73.1812
     });
+
     
     if (res.success) {
       navigate('/');
@@ -48,7 +62,7 @@ const Register = () => {
     setLoading(false);
   };
 
-  const inputClass = "w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-5 py-3 focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] text-white text-sm transition-colors font-bold placeholder:font-normal placeholder:text-[var(--color-zxaaa-muted)]";
+  const inputClass = "w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-5 py-3 focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] text-[var(--color-zxaaa-text)] text-sm transition-colors font-bold placeholder:font-normal placeholder:text-[var(--color-zxaaa-muted)]";
 
   return (
     <div className="flex justify-center items-center min-h-[85vh] px-4 py-12">
@@ -63,7 +77,7 @@ const Register = () => {
           
           <div className="relative">
             <Logo size="lg" interactive={false} showText className="mb-8" />
-            <h2 className="text-3xl font-black text-white leading-tight mb-3">
+            <h2 className="text-3xl font-black text-[var(--color-zxaaa-text)] leading-tight mb-3">
               Join thousands of<br />local traders.
             </h2>
             <p className="text-[var(--color-zxaaa-muted)] text-sm leading-relaxed">
@@ -74,7 +88,7 @@ const Register = () => {
           <div className="relative">
             <div className="p-5 rounded-2xl" style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
               <p className="text-xs font-black text-[var(--color-zxaaa-muted)] uppercase tracking-widest mb-2">🏆 Trust System</p>
-              <p className="text-sm text-white font-bold">Build your ZXAAA Trust Score. Respond within 2 hours and get verified badges.</p>
+              <p className="text-sm text-[var(--color-zxaaa-text)] font-bold">Build your ZXAAA Trust Score. Respond within 2 hours and get verified badges.</p>
             </div>
           </div>
         </div>
@@ -85,7 +99,7 @@ const Register = () => {
             <div className="md:hidden mb-4">
               <Logo size="md" interactive={false} showText={false} />
             </div>
-            <h2 className="text-3xl font-black text-white mb-1">Create Account</h2>
+            <h2 className="text-3xl font-black text-[var(--color-zxaaa-text)] mb-1">Create Account</h2>
             <p className="text-[var(--color-zxaaa-muted)] text-sm">Join the ZXAAA community</p>
           </div>
           
@@ -99,26 +113,26 @@ const Register = () => {
             <div>
               <label className="block text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-1.5">Full Name</label>
               <input type="text" name="name" required value={formData.name}
-                onChange={handleChange} placeholder="Shivam Singh" className={inputClass} />
+                onChange={handleChange} placeholder="Full Name" className={inputClass} />
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-1.5">Email</label>
                 <input type="email" name="email" required value={formData.email}
-                  onChange={handleChange} placeholder="you@email.com" className={inputClass} />
+                  onChange={handleChange} placeholder="email12@gmail.com" className={inputClass} />
               </div>
               <div>
-                <label className="block text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-1.5">Phone</label>
+                <label className="block text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-1.5">Mobile Number</label>
                 <input type="tel" name="phone" required value={formData.phone}
-                  onChange={handleChange} placeholder="9876543210" className={inputClass} />
+                  onChange={handleChange} placeholder="+91 0000000000" className={inputClass} />
               </div>
             </div>
 
             <div>
               <label className="block text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-1.5">City</label>
               <input type="text" name="city" required value={formData.city}
-                onChange={handleChange} placeholder="e.g. Vadodara" className={inputClass} />
+                onChange={handleChange} placeholder="City Name" className={inputClass} />
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -129,7 +143,7 @@ const Register = () => {
                     value={formData.password} onChange={handleChange} placeholder="Min 8 chars"
                     className={inputClass + ' pr-12'} />
                   <button type="button" onClick={() => setShowPwd(p => !p)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-zxaaa-muted)] hover:text-white transition-colors">
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] transition-colors">
                     {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>

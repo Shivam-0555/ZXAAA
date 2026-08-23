@@ -39,7 +39,7 @@ const LocationModal = ({ isOpen, onClose }) => {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/10 transition-all"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-white/10 transition-all"
         >
           <X size={18} />
         </button>
@@ -51,7 +51,7 @@ const LocationModal = ({ isOpen, onClose }) => {
             <MapPin className="w-6 h-6 text-[var(--color-zxaaa-primary)]" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white">Set Your Location</h2>
+            <h2 className="text-xl font-black text-[var(--color-zxaaa-text)]">Set Your Location</h2>
             <p className="text-xs font-bold text-[var(--color-zxaaa-muted)] mt-0.5">
               Find deals near you
             </p>
@@ -62,7 +62,7 @@ const LocationModal = ({ isOpen, onClose }) => {
         <div className="flex items-center gap-3 p-3 rounded-xl mb-5"
           style={{ background: 'var(--color-zxaaa-bg)', border: '1px solid var(--color-zxaaa-border)' }}>
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-          <p className="text-sm font-bold text-white truncate">{selectedLocation.name}</p>
+          <p className="text-sm font-bold text-[var(--color-zxaaa-text)] truncate">{selectedLocation.name}</p>
           <span className="ml-auto text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shrink-0">
             ACTIVE
           </span>
@@ -76,7 +76,7 @@ const LocationModal = ({ isOpen, onClose }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search city..."
-            className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[var(--color-zxaaa-muted)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] transition-colors font-bold"
+            className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl pl-10 pr-4 py-3 text-sm text-[var(--color-zxaaa-text)] placeholder:text-[var(--color-zxaaa-muted)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] transition-colors font-bold"
           />
         </div>
 
@@ -97,8 +97,8 @@ const LocationModal = ({ isOpen, onClose }) => {
                   }}
                   className={`p-3 rounded-xl text-left text-xs font-bold transition-all flex items-center justify-between border ${
                     isSelected
-                      ? 'text-white shadow-[0_0_12px_var(--color-zxaaa-primary-glow)]'
-                      : 'text-[var(--color-zxaaa-muted)] hover:text-white hover:border-[var(--color-zxaaa-primary-glow)]'
+                      ? 'text-[var(--color-zxaaa-text)] shadow-[0_0_12px_var(--color-zxaaa-primary-glow)]'
+                      : 'text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:border-[var(--color-zxaaa-primary-glow)]'
                   }`}
                   style={isSelected ? {
                     background: 'var(--color-zxaaa-primary-bg)',
@@ -119,7 +119,7 @@ const LocationModal = ({ isOpen, onClose }) => {
         {/* Radius Selector */}
         <div className="pt-5 border-t border-[var(--color-zxaaa-border)]">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-xs font-black text-[var(--color-zxaaa-text)] uppercase tracking-widest">
               <Sliders size={14} className="text-[var(--color-zxaaa-primary)]" />
               <span>Search Radius</span>
             </div>
@@ -136,7 +136,7 @@ const LocationModal = ({ isOpen, onClose }) => {
                 className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all border ${
                   radiusKm === r
                     ? 'text-white shadow-[0_0_10px_var(--color-zxaaa-primary-glow)]'
-                    : 'text-[var(--color-zxaaa-muted)] hover:text-white'
+                    : 'text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)]'
                 }`}
                 style={radiusKm === r ? {
                   background: 'var(--color-zxaaa-primary)',

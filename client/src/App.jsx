@@ -11,6 +11,7 @@ import Logo from './components/Logo';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Explore from './pages/Explore';
 import Sell from './pages/Sell';
@@ -36,6 +37,7 @@ import {
 } from 'lucide-react';
 
 const CATEGORIES = [
+  { name: 'All', icon: <Search size={16} /> },
   { name: 'Mobiles', icon: <Smartphone size={16} /> },
   { name: 'Laptops', icon: <Laptop size={16} /> },
   { name: 'Bikes', icon: <Bike size={16} /> },
@@ -81,11 +83,11 @@ function TopNavbar({ setLocationModalOpen }) {
           <div className="hidden md:flex items-center">
             <button
               onClick={() => setLocationModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-[var(--color-zxaaa-card2)] transition-all">
               <MapPin size={16} className="text-[var(--color-zxaaa-primary)]" />
               <div className="flex flex-col items-start">
                 <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Location</span>
-                <span className="truncate max-w-[150px]">{selectedLocation.name.split(',')[0]} (5km)</span>
+                <span className="truncate max-w-[150px] font-bold text-[var(--color-zxaaa-text)]">{selectedLocation.name.split(',')[0]} (5km)</span>
               </div>
               <ChevronDown size={14} className="ml-1 opacity-70" />
             </button>
@@ -101,7 +103,7 @@ function TopNavbar({ setLocationModalOpen }) {
               value={searchQ}
               onChange={e => setSearchQ(e.target.value)}
               placeholder="Search products, brands or categories..."
-              className="w-full text-sm text-white pl-12 pr-4 py-2.5 rounded-full focus:outline-none transition-all bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] focus:border-[var(--color-zxaaa-primary)] focus:shadow-[0_0_0_1px_var(--color-zxaaa-primary-bg)]"
+              className="w-full text-sm text-[var(--color-zxaaa-text)] placeholder:text-[var(--color-zxaaa-muted)] pl-12 pr-4 py-2.5 rounded-full focus:outline-none transition-all bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] focus:border-[var(--color-zxaaa-primary)] focus:shadow-[0_0_0_1px_var(--color-zxaaa-primary-bg)] font-medium"
             />
           </form>
         </div>
@@ -112,18 +114,18 @@ function TopNavbar({ setLocationModalOpen }) {
 
           {user && (
             <>
-              <Link to="/messages" title="Messages" className="hidden md:flex relative p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+              <Link to="/messages" title="Messages" className="hidden md:flex relative p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-black/5 transition-all">
                 <MessageSquare size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--color-zxaaa-primary)]"></span>
               </Link>
-              <Link to="/notifications" title="Notifications" className="hidden md:flex relative p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+              <Link to="/notifications" title="Notifications" className="hidden md:flex relative p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-black/5 transition-all">
                 <Bell size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
               </Link>
               <Link to="/seller/scan-qr" title="Scan QR" className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all text-[var(--color-zxaaa-primary)] border border-[var(--color-zxaaa-primary-glow)] bg-[var(--color-zxaaa-primary-bg)] hover:bg-[var(--color-zxaaa-primary)] hover:text-white">
                 <QrCode size={16} /> Scan QR
               </Link>
-              <Link to="/saved-items" title="Saved" className="hidden md:flex p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 transition-all">
+              <Link to="/saved-items" title="Saved" className="hidden md:flex p-2 rounded-full text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-black/5 transition-all">
                 <Heart size={20} />
               </Link>
             </>
@@ -133,7 +135,7 @@ function TopNavbar({ setLocationModalOpen }) {
             <div className="relative ml-2">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-[var(--color-zxaaa-border)] hover:bg-white/5 transition-all">
+                className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] hover:opacity-90 transition-all">
                 <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white bg-[var(--color-zxaaa-primary)] shrink-0">
                   {user.profileImage ? (
                     <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
@@ -141,7 +143,7 @@ function TopNavbar({ setLocationModalOpen }) {
                     user.name?.charAt(0).toUpperCase() || 'U'
                   )}
                 </div>
-                <span className="text-sm font-semibold hidden md:block max-w-[100px] truncate">{user.name?.split(' ')[0]}</span>
+                <span className="text-sm font-semibold hidden md:block max-w-[100px] truncate text-[var(--color-zxaaa-text)]">{user.name?.split(' ')[0]}</span>
                 <ChevronDown size={14} className="text-[var(--color-zxaaa-muted)] hidden md:block" />
               </button>
 
@@ -150,7 +152,7 @@ function TopNavbar({ setLocationModalOpen }) {
                   <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
                   <div className="absolute right-0 mt-2 w-56 z-50 rounded-2xl bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] shadow-xl animate-fadeIn overflow-hidden">
                     <div className="px-4 py-3 border-b border-[var(--color-zxaaa-border)]">
-                      <p className="text-sm font-bold text-white truncate">{user.name}</p>
+                      <p className="text-sm font-bold text-[var(--color-zxaaa-text)] truncate">{user.name}</p>
                       <p className="text-xs text-[var(--color-zxaaa-muted)] truncate">{user.email}</p>
                       {user.role === 'admin' && (
                         <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--color-zxaaa-primary-bg)] text-[var(--color-zxaaa-primary)]">
@@ -159,17 +161,17 @@ function TopNavbar({ setLocationModalOpen }) {
                       )}
                     </div>
                     <div className="p-2 space-y-1">
-                      <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                      <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-[var(--color-zxaaa-card2)] rounded-xl">
                         <UserIcon size={16} /> Profile
                       </Link>
-                      <Link to="/orders" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                      <Link to="/orders" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-[var(--color-zxaaa-card2)] rounded-xl">
                         <ListOrdered size={16} /> My Orders
                       </Link>
-                      <Link to="/wallet" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                      <Link to="/wallet" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-[var(--color-zxaaa-card2)] rounded-xl">
                         <WalletIcon size={16} /> Wallet
                       </Link>
                       {user.role === 'admin' && (
-                        <Link to="/admin" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-white hover:bg-white/5 rounded-xl">
+                        <Link to="/admin" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] hover:bg-[var(--color-zxaaa-card2)] rounded-xl">
                           <Shield size={16} /> Admin Dashboard
                         </Link>
                       )}
@@ -184,7 +186,7 @@ function TopNavbar({ setLocationModalOpen }) {
             </div>
           ) : (
             <div className="flex items-center gap-3 ml-2">
-              <Link to="/login" className="text-sm font-semibold text-white hover:text-[var(--color-zxaaa-primary)] transition-colors hidden sm:block">
+              <Link to="/login" className="px-4 py-2 text-sm font-bold text-[var(--color-zxaaa-text)] border border-[var(--color-zxaaa-border)] rounded-xl hover:bg-[var(--color-zxaaa-card2)] transition-all">
                 Sign In
               </Link>
               <Link to="/register" className="btn-primary px-4 py-2 text-sm">
@@ -204,7 +206,7 @@ function CategoryBar() {
       <div className="max-w-[1600px] mx-auto px-4 md:px-6">
         <div className="flex items-center gap-6 overflow-x-auto py-3 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
           {CATEGORIES.map((cat, i) => (
-            <Link key={i} to={`/explore?category=${encodeURIComponent(cat.name)}`} className="flex items-center gap-2 text-sm font-medium text-[var(--color-zxaaa-muted)] hover:text-white transition-colors shrink-0">
+            <Link key={i} to={cat.name === 'All' ? '/explore' : `/explore?category=${encodeURIComponent(cat.name)}`} className="flex items-center gap-2 text-sm font-medium text-[var(--color-zxaaa-muted)] hover:text-white transition-colors shrink-0">
               {cat.icon}
               {cat.name}
             </Link>
@@ -218,7 +220,7 @@ function CategoryBar() {
 function MainLayout() {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const location = useLocation();
-  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-zxaaa-bg)] text-[var(--color-zxaaa-text)]">
@@ -237,6 +239,7 @@ function MainLayout() {
           <Route path="/admin"          element={<AdminDashboard />} />
           <Route path="/login"          element={<Login />} />
           <Route path="/register"       element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/seller/scan-qr" element={<ProtectedRoute><ScanQR /></ProtectedRoute>} />
           <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/saved-items"    element={<ProtectedRoute><SavedItems /></ProtectedRoute>} />

@@ -70,21 +70,31 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
             <ProductImageFallback category={product.category} />
           )}
 
-          {/* SOLD overlay */}
+          {/* SOLD overlay — dark with rotated badge */}
           {product.status === 'SOLD' && (
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-10">
-              <span className="bg-red-600 text-white font-extrabold px-5 py-2 rounded-full text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(220,38,38,0.5)] rotate-[-10deg]">
-                SOLD
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-[3px] flex items-center justify-center z-10">
+              <span className="bg-red-600 text-[var(--color-zxaaa-text)] font-extrabold px-6 py-2 rounded-full text-xs uppercase tracking-widest shadow-[0_0_24px_rgba(220,38,38,0.6)] rotate-[-12deg] border border-red-400/30">
+                ✕ SOLD
               </span>
             </div>
           )}
 
-          {/* RESERVED overlay */}
+          {/* RESERVED — corner ribbon, image stays fully visible */}
           {product.status === 'RESERVED' && (
-            <div className="absolute inset-0 bg-amber-950/60 backdrop-blur-[2px] flex items-center justify-center z-10">
-              <span className="bg-amber-500 text-white font-extrabold px-5 py-2 rounded-full text-xs uppercase tracking-widest shadow-lg">
-                RESERVED
-              </span>
+            <div className="absolute top-0 left-0 z-10 overflow-hidden w-28 h-28 pointer-events-none">
+              <div
+                className="absolute text-[9px] font-black text-[var(--color-zxaaa-text)] uppercase tracking-widest text-center leading-none py-1.5"
+                style={{
+                  width: 110,
+                  top: 20,
+                  left: -20,
+                  transform: 'rotate(-45deg)',
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  boxShadow: '0 2px 8px rgba(245,158,11,0.5)',
+                }}
+              >
+                Reserved
+              </div>
             </div>
           )}
 
@@ -108,12 +118,20 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
 
           {/* Bottom Badges */}
           <div className="absolute bottom-3 left-3 flex items-center gap-1.5 z-10">
-            <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-1 rounded-full text-white"
-              style={{ background: 'rgba(16,185,129,0.9)', backdropFilter: 'blur(6px)' }}>
-              <ShieldCheck size={10} /> Verified
-            </span>
-            {isSwapEnabled && (
-              <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-1 rounded-full text-white"
+            {product.status === 'ACTIVE' && (
+              <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-1 rounded-full text-[var(--color-zxaaa-text)]"
+                style={{ background: 'rgba(16,185,129,0.9)', backdropFilter: 'blur(6px)' }}>
+                <ShieldCheck size={10} /> Verified
+              </span>
+            )}
+            {product.status === 'RESERVED' && (
+              <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-1 rounded-full text-amber-900"
+                style={{ background: 'rgba(245,158,11,0.9)', backdropFilter: 'blur(6px)' }}>
+                🔒 Reserved
+              </span>
+            )}
+            {isSwapEnabled && product.status === 'ACTIVE' && (
+              <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-1 rounded-full text-[var(--color-zxaaa-text)]"
                 style={{ background: 'var(--color-zxaaa-primary)', backdropFilter: 'blur(6px)' }}>
                 <RefreshCw size={10} /> Swap
               </span>
@@ -125,7 +143,7 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
         <div className="p-4 flex flex-col gap-3">
           {/* Title & Condition */}
           <div>
-            <h3 className="font-bold text-white text-sm leading-snug line-clamp-2 group-hover:text-[var(--color-zxaaa-text)] transition-colors">
+            <h3 className="font-bold text-[var(--color-zxaaa-text)] text-sm leading-snug line-clamp-2 group-hover:text-[var(--color-zxaaa-text)] transition-colors">
               {product.title}
             </h3>
             <p className="text-[11px] text-[var(--color-zxaaa-muted)] mt-1 font-medium">
@@ -135,7 +153,7 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
 
           {/* Price & Distance */}
           <div className="flex items-center justify-between">
-            <span className="text-xl font-black text-white leading-none">
+            <span className="text-xl font-black text-[var(--color-zxaaa-text)] leading-none">
               ₹{product.price?.toLocaleString('en-IN')}
             </span>
             <span className="text-[10px] text-[var(--color-zxaaa-muted)] font-bold flex items-center gap-1 px-2 py-1 rounded-full"
@@ -148,7 +166,7 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
           {/* Seller & Rating Row */}
           <div className="pt-3 border-t border-[var(--color-zxaaa-border)] flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black text-white shrink-0"
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black text-[var(--color-zxaaa-text)] shrink-0"
                 style={{ background: 'linear-gradient(135deg, var(--color-zxaaa-primary), #2563eb)' }}>
                 {sellerName.charAt(0)}
               </div>
@@ -167,7 +185,7 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
       <div className="px-4 pb-4 flex gap-2">
         <Link
           to={`/product/${product._id}`}
-          className="flex-1 py-2 text-center text-xs font-bold rounded-[10px] text-white transition-all hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
+          className="flex-1 py-2 text-center text-xs font-bold rounded-[10px] text-[var(--color-zxaaa-text)] transition-all hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
           style={{ background: 'var(--color-zxaaa-primary)', boxShadow: '0 2px 12px var(--color-zxaaa-primary-glow)' }}>
           View
         </Link>
