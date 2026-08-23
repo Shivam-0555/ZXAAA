@@ -165,9 +165,9 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">{product.title}</h1>
+              <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-zxaaa-text)] leading-tight">{product.title}</h1>
               
-              <div className="text-4xl font-black text-white">
+              <div className="text-4xl font-black text-[var(--color-zxaaa-text)]">
                 ₹{product.price?.toLocaleString('en-IN')}
               </div>
 
@@ -175,7 +175,7 @@ const ProductDetail = () => {
                 <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--color-zxaaa-primary-bg)] text-[var(--color-zxaaa-text)] border border-[var(--color-zxaaa-primary-glow)] flex items-center gap-1.5">
                   <Tag size={14} /> {product.category}
                 </span>
-                <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--color-zxaaa-bg)] text-white border border-[var(--color-zxaaa-border)]">
+                <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--color-zxaaa-bg)] text-[var(--color-zxaaa-text)] border border-[var(--color-zxaaa-border)]">
                   {product.condition} condition
                 </span>
                 <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--color-zxaaa-bg)] text-[var(--color-zxaaa-muted)] border border-[var(--color-zxaaa-border)] flex items-center gap-1.5">
@@ -185,12 +185,12 @@ const ProductDetail = () => {
 
               {/* Seller Box */}
               <div className="p-4 rounded-[16px] flex items-center gap-4" style={{ background: 'var(--color-zxaaa-bg)', border: '1px solid var(--color-zxaaa-border)' }}>
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black text-white shrink-0" style={{ background: 'linear-gradient(135deg, var(--color-zxaaa-primary), #2563eb)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black text-[var(--color-zxaaa-text)] shrink-0" style={{ background: 'linear-gradient(135deg, var(--color-zxaaa-primary), #2563eb)' }}>
                   {product.seller?.name?.charAt(0) ?? 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs text-[var(--color-zxaaa-muted)] font-bold uppercase tracking-wider mb-0.5">Listed By</div>
-                  <div className="font-bold text-white text-base truncate">{product.seller?.name ?? 'Verified Seller'}</div>
+                  <div className="font-bold text-[var(--color-zxaaa-text)] text-base truncate">{product.seller?.name ?? 'Verified Seller'}</div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-xs text-[var(--color-zxaaa-muted)] font-bold uppercase tracking-wider mb-0.5">Trust Score</div>
@@ -201,7 +201,7 @@ const ProductDetail = () => {
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wider">Description</h3>
+                <h3 className="text-sm font-bold text-[var(--color-zxaaa-text)] mb-2 uppercase tracking-wider">Description</h3>
                 <p className="text-[var(--color-zxaaa-muted)] text-sm leading-relaxed whitespace-pre-line">
                   {product.description || 'No description provided.'}
                 </p>
@@ -260,7 +260,7 @@ const ProductDetail = () => {
               style={{ background: 'var(--color-zxaaa-primary-bg)', border: '1px solid var(--color-zxaaa-primary-glow)', color: 'var(--color-zxaaa-text)' }}>
               <ShieldCheck size={12} /> Secure Transaction
             </div>
-            <h2 className="text-3xl font-black text-white">Order Reserved!</h2>
+            <h2 className="text-3xl font-black text-[var(--color-zxaaa-text)]">Order Reserved!</h2>
             <p className="text-sm text-[var(--color-zxaaa-muted)] mt-2 max-w-xl">
               You have reserved this product. Please show this secure QR code to the seller during your in-person meetup to verify and complete the transaction.
             </p>

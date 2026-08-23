@@ -139,6 +139,25 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [cityName]);
 
+  // Dynamic color rotation every 5 seconds for hero banner
+  const PALETTES = [
+    { title: '#f59e0b', sub: '#2563eb', badge: '#103f30ff' }, // Yellow, Blue, Green
+    { title: '#0c553cff', sub: '#ec4899', badge: '#8b5cf6' }, // Green, Pink, Purple
+    { title: '#06b6d4', sub: '#f97316', badge: '#eab308' }, // Cyan, Orange, Yellow
+    { title: '#8b5cf6', sub: '#3b82f6', badge: '#ef4444' }, // Purple, Blue, Red
+    { title: '#ec4899', sub: '#10b981', badge: '#06b6d4' }, // Pink, Green, Cyan
+  ];
+  const [paletteIdx, setPaletteIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPaletteIdx(prev => (prev + 1) % PALETTES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentPalette = PALETTES[paletteIdx];
+
   // Fetch Real Swap Requests
   useEffect(() => {
     let cancelled = false;
@@ -190,13 +209,16 @@ export default function Home() {
               ZXAAA Marketplace
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] mb-4 text-amber-400">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] mb-4"
+              style={{ color: currentPalette.title, transition: 'color 1s ease-in-out' }}>
               Buy. Sell. Swap.
             </h1>
-            <p className="text-3xl md:text-4xl font-extrabold leading-[1.1] mb-6 text-[var(--color-zxaaa-primary)]">
+            <p className="text-3xl md:text-4xl font-extrabold leading-[1.1] mb-6"
+              style={{ color: currentPalette.sub, transition: 'color 1s ease-in-out' }}>
               Anything. Anywhere.
             </p>
-            <p className="text-[var(--color-zxaaa-muted)] text-base md:text-lg mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium">
+            <p className="text-base md:text-lg mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium"
+              style={{ color: 'var(--color-zxaaa-muted)', transition: 'color 1s ease-in-out' }}>
               Find useful products near you, sell what you no longer need, or swap it for something you want.
             </p>
 
