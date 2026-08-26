@@ -141,11 +141,11 @@ export default function Home() {
 
   // Dynamic color rotation every 5 seconds for hero banner
   const PALETTES = [
-    { title: '#f59e0b', sub: '#2563eb', badge: '#103f30ff' }, // Yellow, Blue, Green
-    { title: '#0c553cff', sub: '#ec4899', badge: '#8b5cf6' }, // Green, Pink, Purple
-    { title: '#06b6d4', sub: '#f97316', badge: '#eab308' }, // Cyan, Orange, Yellow
-    { title: '#8b5cf6', sub: '#3b82f6', badge: '#ef4444' }, // Purple, Blue, Red
-    { title: '#ec4899', sub: '#10b981', badge: '#06b6d4' }, // Pink, Green, Cyan
+    { title: '#c8f36b', sub: '#2563eb', badge: '#103f30ff' },
+    { title: '#c8f36b', sub: '#ec4899', badge: '#8b5cf6' },
+    { title: '#c8f36b', sub: '#f97316', badge: '#eab308' },
+    { title: '#c8f36b', sub: '#3b82f6', badge: '#ef4444' },
+    { title: '#c8f36b', sub: '#10b981', badge: '#06b6d4' },
   ];
   const [paletteIdx, setPaletteIdx] = useState(0);
 
