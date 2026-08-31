@@ -97,3 +97,81 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Update a product
+// @route   PUT /api/products/:id
+// @access  Private
+export const updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Ensure the authenticated user is the seller/owner
+    if (product.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to edit this product' });
+    }
+
+    // Prevent editing if the product is already sold
+    if (product.status === 'SOLD') {
+      return res.status(400).json({ success: false, message: 'Cannot edit a sold product' });
+    }
+
+    const {
+      title,
+      description,
+      category,
+      brand,
+      condition,
+      price,
+      negotiable,
+      exchangeAvailable,
+      images,
+      city,
+    } = req.body;
+
+    // Update fields
+    product.title = title || product.title;
+    product.description = description || product.description;
+    product.category = category || product.category;
+    product.brand = brand || product.brand;
+    product.condition = condition || product.condition;
+    product.price = price !== undefined ? price : product.price;
+    product.negotiable = negotiable !== undefined ? negotiable : product.negotiable;
+    product.exchangeAvailable = exchangeAvailable !== undefined ? exchangeAvailable : product.exchangeAvailable;
+    product.images = images || product.images;
+    product.city = city || product.city;
+
+    const updatedProduct = await product.save();
+    res.json({ success: true, data: updatedProduct });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete a product
+// @route   DELETE /api/products/:id
+// @access  Private
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Ensure the authenticated user is the seller/owner
+    if (product.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to delete this product' });
+    }
+
+    // Delete the product
+    await product.deleteOne();
+
+    res.json({ success: true, message: 'Product removed' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

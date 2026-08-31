@@ -11,7 +11,7 @@ export default function Settings() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
       <div>
-        <h1 className="text-2xl md:text-3xl font-black text-white flex items-center gap-3">
+        <h1 className="text-2xl md:text-3xl font-black text-[var(--color-zxaaa-text)] flex items-center gap-3">
           <SettingsIcon className="text-purple-400" /> Account & App Settings
         </h1>
         <p className="text-xs md:text-sm text-[var(--color-zxaaa-muted)] mt-1">
@@ -25,7 +25,7 @@ export default function Settings() {
         <div className="flex items-center gap-3">
           <Palette className="text-purple-400" size={20} />
           <div>
-            <h3 className="text-base font-bold text-white">Color Theme</h3>
+            <h3 className="text-base font-bold text-[var(--color-zxaaa-text)]">Color Theme</h3>
             <p className="text-xs text-[var(--color-zxaaa-muted)]">Select one of 5 premium dark-mode themes</p>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function Settings() {
                 }}>
                 <span className="w-6 h-6 rounded-full border-2 shrink-0"
                   style={{ background: t.swatch, borderColor: isActive ? '#7c3aed' : 'rgba(255,255,255,0.2)' }} />
-                <span className="text-white flex-1">{t.emoji} {t.label}</span>
+                <span className="text-[var(--color-zxaaa-text)] flex-1">{t.emoji} {t.label}</span>
                 {isActive && <Check size={16} className="text-purple-400" />}
               </button>
             );
@@ -60,13 +60,13 @@ export default function Settings() {
         <div className="flex items-center gap-3">
           <MapPin className="text-pink-400" size={20} />
           <div>
-            <h3 className="text-base font-bold text-white">Active Location</h3>
+            <h3 className="text-base font-bold text-[var(--color-zxaaa-text)]">Active Location</h3>
             <p className="text-xs text-[var(--color-zxaaa-muted)]">Marketplace feeds are filtered for this city</p>
           </div>
         </div>
         <div className="p-3 rounded-xl flex items-center justify-between"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--color-zxaaa-border)' }}>
-          <span className="text-sm font-extrabold text-white">{selectedLocation?.name || 'Vadodara, Gujarat'}</span>
+          style={{ background: 'var(--color-zxaaa-card2)', border: '1px solid var(--color-zxaaa-border)' }}>
+          <span className="text-sm font-extrabold text-[var(--color-zxaaa-text)]">{selectedLocation?.name || 'Vadodara, Gujarat'}</span>
           <span className="text-xs text-pink-400 font-bold">Selected</span>
         </div>
       </div>
@@ -78,14 +78,14 @@ export default function Settings() {
           <div className="flex items-center gap-3">
             <User className="text-blue-400" size={20} />
             <div>
-              <h3 className="text-base font-bold text-white">Account Details</h3>
+              <h3 className="text-base font-bold text-[var(--color-zxaaa-text)]">Account Details</h3>
               <p className="text-xs text-[var(--color-zxaaa-muted)]">Logged in as {user.name}</p>
             </div>
           </div>
           <div className="p-3.5 rounded-xl space-y-1.5"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--color-zxaaa-border)' }}>
-            <p className="text-xs text-white"><strong>Email:</strong> {user.email}</p>
-            <p className="text-xs text-white"><strong>Role:</strong> <span className="uppercase text-purple-400 font-bold">{user.role || 'User'}</span></p>
+            style={{ background: 'var(--color-zxaaa-card2)', border: '1px solid var(--color-zxaaa-border)' }}>
+            <p className="text-xs text-[var(--color-zxaaa-text)]"><strong>Email:</strong> {user.email}</p>
+            <p className="text-xs text-[var(--color-zxaaa-text)]"><strong>Role:</strong> <span className="uppercase text-purple-400 font-bold">{user.role || 'User'}</span></p>
           </div>
         </div>
       )}

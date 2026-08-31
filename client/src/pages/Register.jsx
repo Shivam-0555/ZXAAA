@@ -37,9 +37,8 @@ const Register = () => {
       return setError('Please enter a valid email address');
     }
     
-    const cleanedPhone = formData.phone.replace(/^(\+91|91)/, '').replace(/[\s\-]/g, '');
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(cleanedPhone)) {
+    const cleanedPhone = formData.phone.replace(/\D/g, '');
+    if (cleanedPhone.length !== 10) {
       return setError('Please enter a valid 10-digit mobile number');
     }
 
@@ -124,8 +123,37 @@ const Register = () => {
               </div>
               <div>
                 <label className="block text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-1.5">Mobile Number</label>
-                <input type="tel" name="phone" required value={formData.phone}
-                  onChange={handleChange} placeholder="+91 0000000000" className={inputClass} />
+                <div className="flex items-center w-full border rounded-xl overflow-hidden transition-colors focus-within:border-[var(--color-zxaaa-primary-glow)]"
+                  style={{ background: 'var(--color-zxaaa-bg)', borderColor: 'var(--color-zxaaa-border)' }}>
+                  <span className="px-4 py-3 text-sm font-black shrink-0 select-none border-r"
+                    style={{ 
+                      color: 'var(--color-zxaaa-text)', 
+                      borderColor: 'var(--color-zxaaa-border)', 
+                      background: 'rgba(255,255,255,0.04)' 
+                    }}>
+                    🇮🇳 +91
+                  </span>
+                  <input 
+                    type="tel" 
+                    name="phone" 
+                    value={formData.phone}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setFormData({ ...formData, phone: val });
+                    }} 
+                    placeholder="0000000000" 
+                    maxLength={10}
+                    inputMode="numeric"
+                    className="flex-1 bg-transparent px-4 py-3 focus:outline-none text-sm font-bold tracking-widest"
+                    style={{ color: 'var(--color-zxaaa-text)', caretColor: 'var(--color-zxaaa-primary)' }}
+                  />
+                  {formData.phone.length > 0 && (
+                    <span className="px-3 text-xs font-black shrink-0"
+                      style={{ color: formData.phone.length === 10 ? '#34d399' : 'var(--color-zxaaa-muted)' }}>
+                      {formData.phone.length}/10
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

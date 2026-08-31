@@ -216,3 +216,116 @@ export const verifyQR = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error during verification' });
   }
 };
+// @desc    Get logged-in user's orders (as buyer)
+// @route   GET /api/orders/myorders
+// @access  Private
+export const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ buyer: req.user._id })
+      .populate('product', 'title images price category condition')
+      .populate('seller', 'name trustScore upiId')
+      .populate('buyer', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get a single order by ID (buyer or seller access)
+// @route   GET /api/orders/:id
+// @access  Private
+export const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('product', 'title images price category condition')
+      .populate('seller', 'name trustScore upiId')
+      .populate('buyer', 'name email');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const buyerId = order.buyer?._id?.toString() || order.buyer?.toString();
+    const sellerId = order.seller?._id?.toString() || order.seller?.toString();
+    const requesterId = req.user._id.toString();
+
+    // Only buyer or seller of this order may view it
+    if (buyerId !== requesterId && sellerId !== requesterId && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized to view this order' });
+    }
+
+    res.json({ success: true, data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Complete UPI Payment (buyer marks as paid to generate bill)
+// @route   POST /api/orders/complete-upi
+// @access  Private
+export const completeUpiPayment = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Order ID is required' });
+    }
+
+    const order = await Order.findById(orderId).populate('product');
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Verify requester is the buyer
+    if (order.buyer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to complete this order' });
+    }
+
+    // Verify it's an online payment
+    if (order.paymentMethod !== 'Online Payment') {
+      return res.status(400).json({ success: false, message: 'Only UPI/Online payments can be completed this way' });
+    }
+
+    if (order.orderStatus === 'COMPLETED') {
+      return res.status(400).json({ success: false, message: 'Order is already completed' });
+    }
+
+    // Create a transaction record
+    const transaction = await Transaction.create({
+      order: order._id,
+      buyer: order.buyer,
+      seller: order.seller,
+      amount: order.amount,
+      type: 'PAYMENT',
+      status: 'COMPLETED',
+      referenceId: order.qrReference,
+      paymentMethod: order.paymentMethod,
+    });
+
+    // Update order status
+    order.orderStatus = 'COMPLETED';
+    order.paymentStatus = 'SUCCESS';
+    await order.save();
+
+    // Update product status
+    if (order.product) {
+      order.product.status = 'SOLD';
+      await order.product.save();
+    }
+
+    // Return the updated order fully populated
+    const updatedOrder = await Order.findById(order._id)
+      .populate('product')
+      .populate('seller', 'name trustScore upiId')
+      .populate('buyer', 'name email');
+
+    res.json({
+      success: true,
+      message: 'Payment marked as complete and receipt generated',
+      data: updatedOrder,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

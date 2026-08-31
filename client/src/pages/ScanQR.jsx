@@ -186,20 +186,20 @@ const ScanQR = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-[var(--color-zxaaa-primary-bg)] border border-[var(--color-zxaaa-primary-glow)]">
           <ScanLine className="w-8 h-8 text-[var(--color-zxaaa-primary)]" />
         </div>
-        <h1 className="text-3xl font-black text-white">QR Verification System</h1>
+        <h1 className="text-3xl font-black text-[var(--color-zxaaa-text)]">QR Verification System</h1>
         <p className="text-[var(--color-zxaaa-muted)] mt-2">
           Scan buyer codes during meetup to verify transactions.
         </p>
       </div>
 
       {/* Mode Tabs */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-bg)] max-w-sm mx-auto mb-8">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-card2)] max-w-sm mx-auto mb-8">
         <button
           onClick={() => setActiveMode('scan')}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeMode === 'scan'
               ? 'bg-[var(--color-zxaaa-primary)] text-white shadow-[0_0_12px_var(--color-zxaaa-primary-glow)]'
-              : 'text-[var(--color-zxaaa-muted)] hover:text-white'
+              : 'text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)]'
           }`}
         >
           <Camera size={16} /> Scan Mode
@@ -209,7 +209,7 @@ const ScanQR = () => {
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
             activeMode === 'generate'
               ? 'bg-[var(--color-zxaaa-primary)] text-white shadow-[0_0_12px_var(--color-zxaaa-primary-glow)]'
-              : 'text-[var(--color-zxaaa-muted)] hover:text-white'
+              : 'text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)]'
           }`}
         >
           <QrIcon size={16} /> Dev: Generate
@@ -220,7 +220,7 @@ const ScanQR = () => {
       {activeMode === 'generate' ? (
         <div className="space-y-6 animate-fadeIn max-w-sm mx-auto">
           <div className="p-6 rounded-2xl border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-card)] space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-[var(--color-zxaaa-text)] flex items-center gap-2">
               <Sparkles size={16} className="text-[var(--color-zxaaa-primary)]" /> Test QR Generator
             </h3>
             
@@ -234,7 +234,7 @@ const ScanQR = () => {
                   value={genText}
                   onChange={(e) => setGenText(e.target.value)}
                   placeholder="ZX-TXN-..."
-                  className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)]"
+                  className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)]"
                 />
                 <button
                   onClick={() => setGenText('ZX-TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase())}
@@ -279,7 +279,7 @@ const ScanQR = () => {
         <div className="p-5 border-b border-[var(--color-zxaaa-border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-[var(--color-zxaaa-muted)]" />
-            <span className="text-sm font-bold text-white">Camera Viewfinder</span>
+            <span className="text-sm font-bold text-[var(--color-zxaaa-text)]">Camera Viewfinder</span>
           </div>
           {isScanning && (
             <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-400">
@@ -304,7 +304,7 @@ const ScanQR = () => {
                   <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-6 bg-[var(--color-zxaaa-primary-bg)] border border-[var(--color-zxaaa-primary-glow)] shadow-[0_0_20px_var(--color-zxaaa-primary-glow)]">
                     <Camera className="w-10 h-10 text-[var(--color-zxaaa-primary)]" />
                   </div>
-                  <h3 className="text-white font-bold mb-2 text-lg">Scanner Ready</h3>
+                  <h3 className="text-[var(--color-zxaaa-text)] font-bold mb-2 text-lg">Scanner Ready</h3>
                   <p className="text-[var(--color-zxaaa-muted)] text-sm mb-8 text-center max-w-xs">
                     Position the buyer's QR code clearly within the camera frame to verify.
                   </p>
@@ -314,7 +314,7 @@ const ScanQR = () => {
                   <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-6 bg-red-500/10 border border-red-500/30">
                     <CameraOff className="w-10 h-10 text-red-400" />
                   </div>
-                  <h3 className="text-white font-bold mb-2 text-lg">Camera Unavailable</h3>
+                  <h3 className="text-[var(--color-zxaaa-text)] font-bold mb-2 text-lg">Camera Unavailable</h3>
                   <p className="text-[var(--color-zxaaa-muted)] text-sm mb-8 text-center max-w-xs">
                     {cameraError || 'Please allow camera permissions or use manual entry.'}
                   </p>
@@ -347,13 +347,13 @@ const ScanQR = () => {
       <div className="rounded-[20px] overflow-hidden bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)]">
         <button
           onClick={() => setShowManual(!showManual)}
-          className="w-full p-5 flex items-center justify-between text-left hover:bg-[var(--color-zxaaa-bg)] transition-colors"
+          className="w-full p-5 flex items-center justify-between text-left hover:bg-[var(--color-zxaaa-card2)] transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] flex items-center justify-center">
                <Keyboard className="w-4 h-4 text-[var(--color-zxaaa-muted)]" />
             </div>
-            <span className="text-sm font-bold text-white">Manual Reference Entry</span>
+            <span className="text-sm font-bold text-[var(--color-zxaaa-text)]">Manual Reference Entry</span>
           </div>
           <span className={`text-[var(--color-zxaaa-muted)] transition-transform duration-300 ${showManual ? 'rotate-180' : ''}`}>▼</span>
         </button>
@@ -369,7 +369,7 @@ const ScanQR = () => {
                 value={manualRef}
                 onChange={(e) => setManualRef(e.target.value)}
                 placeholder="e.g. ZX-TXN-..."
-                className="flex-1 px-4 py-3 rounded-xl text-sm font-mono text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)]"
+                className="flex-1 px-4 py-3 rounded-xl text-sm font-mono text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)]"
               />
               <button
                 type="submit"
@@ -390,7 +390,7 @@ const ScanQR = () => {
           <div className="rounded-[24px] p-10 flex flex-col items-center gap-5 bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-primary-glow)] shadow-[0_0_40px_var(--color-zxaaa-primary-glow)]">
             <Loader2 size={48} className="text-[var(--color-zxaaa-primary)] animate-spin" />
             <div className="text-center">
-               <p className="text-xl font-black text-white">Verifying...</p>
+               <p className="text-xl font-black text-[var(--color-zxaaa-text)]">Verifying...</p>
                <p className="text-[var(--color-zxaaa-muted)] text-sm font-bold mt-1">Checking secure database</p>
             </div>
           </div>

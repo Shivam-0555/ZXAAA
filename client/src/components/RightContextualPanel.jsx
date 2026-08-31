@@ -107,13 +107,13 @@ export default function RightContextualPanel() {
             }}>
             <Package size={26} className="text-purple-400" />
           </div>
-          <h3 className="font-extrabold text-white text-lg mb-1">Join ZXAAA</h3>
+          <h3 className="font-extrabold text-[var(--color-zxaaa-text)] text-lg mb-1">Join ZXAAA</h3>
           <p className="text-xs text-[var(--color-zxaaa-muted)] mb-5 leading-relaxed">
             Create an account to buy, sell, or swap products with verified local users.
           </p>
           <div className="flex gap-2.5">
-            <Link to="/login" className="flex-1 py-2.5 text-xs font-bold text-center rounded-xl text-white transition-all hover:bg-white/10"
-              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'rgba(255,255,255,0.03)' }}>
+            <Link to="/login" className="flex-1 py-2.5 text-xs font-bold text-center rounded-xl text-[var(--color-zxaaa-text)] transition-all hover:bg-black/5"
+              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'var(--color-zxaaa-card2)' }}>
               Sign In
             </Link>
             <Link to="/register" className="flex-1 py-2.5 text-xs font-extrabold text-center rounded-xl text-white transition-all hover:opacity-90 shadow-md"
@@ -133,7 +133,7 @@ export default function RightContextualPanel() {
             </div>
             <div className="overflow-hidden flex-1">
               <p className="text-[11px] text-[var(--color-zxaaa-muted)]">Your ZXAAA Profile</p>
-              <p className="font-bold text-white text-base truncate leading-tight">
+              <p className="font-bold text-[var(--color-zxaaa-text)] text-base truncate leading-tight">
                 {user.name}
               </p>
               <div className="flex items-center gap-1 mt-1">
@@ -145,7 +145,7 @@ export default function RightContextualPanel() {
 
           {/* User Stats Grid */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Your Activity</span>
+            <span className="text-xs font-bold text-[var(--color-zxaaa-text)] uppercase tracking-wider">Your Activity</span>
             <Link to="/orders" className="text-[11px] font-semibold text-purple-400 hover:underline">
               View History
             </Link>
@@ -158,14 +158,14 @@ export default function RightContextualPanel() {
               { label: 'Bought', val: userStats.bought, icon: <ShoppingBag size={14} className="text-blue-400" />, to: '/orders?tab=bought' },
               { label: 'Swapped', val: userStats.swapped, icon: <RefreshCw size={14} className="text-amber-400" />, to: '/orders?tab=swapped' },
             ].map(s => (
-              <Link key={s.label} to={s.to} className="rounded-xl p-2.5 flex items-center gap-2.5 transition-all hover:bg-white/[0.04]"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--color-zxaaa-border)' }}>
-                <div className="p-1.5 rounded-lg shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <Link key={s.label} to={s.to} className="rounded-xl p-2.5 flex items-center gap-2.5 transition-all hover:bg-black/5"
+                style={{ background: 'var(--color-zxaaa-card2)', border: '1px solid var(--color-zxaaa-border)' }}>
+                <div className="p-1.5 rounded-lg shrink-0" style={{ background: 'var(--color-zxaaa-primary-bg)' }}>
                   {s.icon}
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] text-[var(--color-zxaaa-muted)] font-medium leading-none mb-1">{s.label}</p>
-                  <p className="text-sm font-extrabold text-white leading-none">{s.val}</p>
+                  <p className="text-sm font-extrabold text-[var(--color-zxaaa-text)] leading-none">{s.val}</p>
                 </div>
               </Link>
             ))}
@@ -178,7 +178,7 @@ export default function RightContextualPanel() {
         <div className="rounded-[22px] p-5"
           style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
           <div className="flex items-center justify-between mb-3.5">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <h4 className="text-xs font-bold text-[var(--color-zxaaa-text)] uppercase tracking-wider flex items-center gap-1.5">
               <Zap size={14} className="text-amber-400" />
               Quick Activity
             </h4>
@@ -190,33 +190,33 @@ export default function RightContextualPanel() {
           </div>
 
           <div className="space-y-2">
-            <Link to="/messages" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
-              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'rgba(255,255,255,0.02)' }}>
+            <Link to="/messages" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-black/5 transition-colors"
+              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'var(--color-zxaaa-card2)' }}>
               <div className="flex items-center gap-2.5">
                 <MessageSquare size={16} className="text-blue-400" />
-                <span className="text-xs font-semibold text-white">Unread Messages</span>
+                <span className="text-xs font-semibold text-[var(--color-zxaaa-text)]">Unread Messages</span>
               </div>
               <span className="text-xs font-bold text-[var(--color-zxaaa-muted)]">
                 {unreadMessages > 0 ? unreadMessages : '0'}
               </span>
             </Link>
 
-            <Link to="/notifications" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
-              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'rgba(255,255,255,0.02)' }}>
+            <Link to="/notifications" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-black/5 transition-colors"
+              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'var(--color-zxaaa-card2)' }}>
               <div className="flex items-center gap-2.5">
                 <Bell size={16} className="text-purple-400" />
-                <span className="text-xs font-semibold text-white">Notifications</span>
+                <span className="text-xs font-semibold text-[var(--color-zxaaa-text)]">Notifications</span>
               </div>
               <span className="text-xs font-bold text-[var(--color-zxaaa-muted)]">
                 {unreadNotifications > 0 ? unreadNotifications : '0'}
               </span>
             </Link>
 
-            <Link to="/swap" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
-              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'rgba(255,255,255,0.02)' }}>
+            <Link to="/swap" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-black/5 transition-colors"
+              style={{ border: '1px solid var(--color-zxaaa-border)', background: 'var(--color-zxaaa-card2)' }}>
               <div className="flex items-center gap-2.5">
                 <RefreshCw size={16} className="text-emerald-400" />
-                <span className="text-xs font-semibold text-white">Swap Requests</span>
+                <span className="text-xs font-semibold text-[var(--color-zxaaa-text)]">Swap Requests</span>
               </div>
               <span className="text-xs font-bold text-[var(--color-zxaaa-muted)]">0</span>
             </Link>
@@ -234,7 +234,7 @@ export default function RightContextualPanel() {
       <div className="rounded-[22px] p-5"
         style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <h4 className="text-xs font-bold text-[var(--color-zxaaa-text)] uppercase tracking-wider flex items-center gap-1.5">
             <Award size={15} className="text-purple-400" />
             ZXAAA Trust Score
           </h4>
@@ -247,7 +247,7 @@ export default function RightContextualPanel() {
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center shrink-0"
             style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(16,185,129,0.15))', border: '1px solid rgba(124,58,237,0.3)' }}>
-            <span className="text-lg font-black text-white leading-none">4.9</span>
+            <span className="text-lg font-black text-[var(--color-zxaaa-text)] leading-none">4.9</span>
             <span className="text-[9px] text-amber-400 font-bold flex items-center gap-0.5 mt-1">
               <Star size={9} fill="currentColor" /> Trust
             </span>
@@ -256,11 +256,11 @@ export default function RightContextualPanel() {
           <div className="space-y-1.5 flex-1 text-xs">
             <div className="flex justify-between text-[11px]">
               <span className="text-[var(--color-zxaaa-muted)]">Response Rate</span>
-              <span className="font-bold text-white">98%</span>
+              <span className="font-bold text-[var(--color-zxaaa-text)]">98%</span>
             </div>
             <div className="flex justify-between text-[11px]">
               <span className="text-[var(--color-zxaaa-muted)]">Completed Deals</span>
-              <span className="font-bold text-white">{userStats.sold + userStats.bought}</span>
+              <span className="font-bold text-[var(--color-zxaaa-text)]">{userStats.sold + userStats.bought}</span>
             </div>
             <div className="flex justify-between text-[11px]">
               <span className="text-[var(--color-zxaaa-muted)]">Verification</span>
@@ -275,7 +275,7 @@ export default function RightContextualPanel() {
         <div className="rounded-[22px] p-5"
           style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <h4 className="text-xs font-bold text-[var(--color-zxaaa-text)] uppercase tracking-wider flex items-center gap-1.5">
               <Clock size={14} className="text-blue-400" />
               Seller Response
             </h4>
@@ -284,7 +284,7 @@ export default function RightContextualPanel() {
 
           {pendingRequests.length === 0 ? (
             <div className="p-4 rounded-xl text-center"
-              style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--color-zxaaa-border)' }}>
+              style={{ background: 'var(--color-zxaaa-card2)', border: '1px dashed var(--color-zxaaa-border)' }}>
               <CheckCircle size={20} className="mx-auto mb-1.5 text-[var(--color-zxaaa-muted)] opacity-60" />
               <p className="text-xs font-semibold text-[var(--color-zxaaa-muted)]">No pending requests</p>
             </div>
@@ -292,10 +292,10 @@ export default function RightContextualPanel() {
             <div className="space-y-3">
               {pendingRequests.map(req => (
                 <div key={req._id} className="p-3 rounded-xl space-y-2.5"
-                  style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.3)' }}>
+                  style={{ background: 'var(--color-zxaaa-card2)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs font-bold text-white truncate max-w-[170px]">{req.product?.title || 'Purchase Request'}</p>
+                      <p className="text-xs font-bold text-[var(--color-zxaaa-text)] truncate max-w-[170px]">{req.product?.title || 'Purchase Request'}</p>
                       <p className="text-[10px] text-[var(--color-zxaaa-muted)]">Buyer: {req.buyer?.name || 'Customer'}</p>
                     </div>
                     <span className="text-[10px] font-black text-amber-400 px-1.5 py-0.5 rounded bg-amber-400/10">

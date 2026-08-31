@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLocationContext } from '../context/LocationContext';
-import { Image as ImageIcon, Plus, Trash2, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, MapPin, Tag, RefreshCw } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, MapPin, Tag, RefreshCw, Upload } from 'lucide-react';
 
 const SAMPLE_IMAGE_SETS = [
   'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop',
@@ -21,6 +21,7 @@ const Sell = () => {
   const { user } = useAuth();
   const { selectedLocation } = useLocationContext();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -35,6 +36,27 @@ const Sell = () => {
   const [imageUrls, setImageUrls] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    files.slice(0, 6).forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result;
+        setImageUrls(prev => {
+          const next = [...prev];
+          // Find first empty slot or replace slot i
+          const emptyIdx = next.findIndex(u => !u.trim());
+          const targetIdx = emptyIdx !== -1 ? emptyIdx : i;
+          if (targetIdx < 6) next[targetIdx] = base64;
+          return next;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleImageUrlChange = (index, value) => {
     const newUrls = [...imageUrls];
@@ -259,15 +281,38 @@ const Sell = () => {
           {/* STEP 3: Images */}
           {step === 3 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="flex justify-between items-center border-b border-[var(--color-zxaaa-border)] pb-2 mb-6">
-                <h2 className="text-xl font-bold text-[var(--color-zxaaa-text)]">Product Images</h2>
-                <button
-                  type="button"
-                  onClick={handleFillSampleImages}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--color-zxaaa-primary)] hover:text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-primary-bg)] hover:bg-[var(--color-zxaaa-primary)] border border-[var(--color-zxaaa-primary-glow)] transition-all"
-                >
-                  <Sparkles size={14} /> Auto-fill Samples
-                </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                accept="image/*" 
+                multiple 
+                className="hidden" 
+              />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--color-zxaaa-border)] pb-3 mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-[var(--color-zxaaa-text)]">Product Photos</h2>
+                  <p className="text-xs text-[var(--color-zxaaa-muted)]">Upload photos from device or paste image URLs below</p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[var(--color-zxaaa-primary)] hover:opacity-90 shadow-md shadow-[var(--color-zxaaa-primary-glow)] transition-all"
+                  >
+                    <Upload size={14} /> Upload from Device
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleFillSampleImages}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-zxaaa-primary)] hover:text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-primary-bg)] hover:bg-[var(--color-zxaaa-primary)] border border-[var(--color-zxaaa-primary-glow)] transition-all"
+                  >
+                    <Sparkles size={14} /> Samples
+                  </button>
+                </div>
               </div>
 
               {/* Live Previews */}
@@ -275,32 +320,43 @@ const Sell = () => {
                 {imageUrls.map((url, idx) => (
                   <div 
                     key={idx} 
-                    className="relative group rounded-xl overflow-hidden border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-bg)] flex flex-col items-center justify-center h-32"
+                    className="relative group rounded-xl overflow-hidden border border-[var(--color-zxaaa-border)] bg-[var(--color-zxaaa-card2)] flex items-center justify-center h-36 shadow-sm"
                   >
                     {url.trim() ? (
-                      <>
+                      <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+                        {/* Ambient Blur Fill */}
+                        <img 
+                          src={url.trim()} 
+                          alt="" 
+                          aria-hidden="true" 
+                          className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-125 pointer-events-none"
+                        />
+                        {/* Main Image */}
                         <img 
                           src={url.trim()} 
                           alt={`Upload ${idx + 1}`} 
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          className="relative z-10 max-w-full max-h-full object-contain p-1 group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
-                        <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/70 text-[var(--color-zxaaa-text)] backdrop-blur-md border border-white/20">
-                          {idx === 0 ? 'Cover' : `Img ${idx + 1}`}
+                        <span className="absolute top-2 left-2 z-20 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/70 text-white backdrop-blur-md border border-white/20">
+                          {idx === 0 ? 'Main Cover' : `Photo ${idx + 1}`}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleClearImage(idx)}
-                          className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 text-rose-400 hover:text-[var(--color-zxaaa-text)] hover:bg-rose-500 backdrop-blur-md transition-all opacity-0 group-hover:opacity-100"
+                          className="absolute top-2 right-2 z-20 p-1.5 rounded-lg bg-black/70 text-rose-400 hover:text-white hover:bg-rose-500 backdrop-blur-md transition-all opacity-0 group-hover:opacity-100"
                         >
                           <Trash2 size={14} />
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center gap-2 p-2 text-center text-[var(--color-zxaaa-muted)]">
-                        <ImageIcon size={24} className="opacity-50" />
+                      <div 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex flex-col items-center justify-center gap-2 p-3 text-center text-[var(--color-zxaaa-muted)] cursor-pointer hover:text-[var(--color-zxaaa-text)] transition-colors w-full h-full"
+                      >
+                        <Upload size={22} className="opacity-50" />
                         <span className="text-xs font-bold">
-                          {idx === 0 ? 'Main Image' : `Image ${idx + 1}`}
+                          {idx === 0 ? 'Add Cover Photo' : `Add Photo ${idx + 1}`}
                         </span>
                       </div>
                     )}
@@ -309,18 +365,21 @@ const Sell = () => {
               </div>
 
               {/* URL Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                {imageUrls.map((url, idx) => (
-                  <div key={idx}>
-                    <input 
-                      type="url" 
-                      placeholder={`Image ${idx + 1} URL`}
-                      value={url}
-                      onChange={e => handleImageUrlChange(idx, e.target.value)}
-                      className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] text-[var(--color-zxaaa-text)] text-xs" 
-                    />
-                  </div>
-                ))}
+              <div className="pt-2">
+                <label className="block text-xs font-bold text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-3">Or Paste Direct Image Web Links (Optional)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {imageUrls.map((url, idx) => (
+                    <div key={idx}>
+                      <input 
+                        type="url" 
+                        placeholder={`Photo ${idx + 1} URL (https://...)`}
+                        value={url}
+                        onChange={e => handleImageUrlChange(idx, e.target.value)}
+                        className="w-full bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] text-[var(--color-zxaaa-text)] text-xs font-medium" 
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

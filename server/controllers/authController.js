@@ -121,7 +121,7 @@ export const loginUser = async (req, res) => {
 // @access  Private
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
+    const user = await User.findById(req.user._id).select('-password -otp -otpExpires');
     if (user) {
       res.json({ success: true, data: user });
     } else {
@@ -151,6 +151,14 @@ export const updateUserProfile = async (req, res) => {
     if (req.body.password) {
       user.password = req.body.password;
     }
+    // UPI ID — validate format before saving
+    if (req.body.upiId !== undefined) {
+      const upiVal = req.body.upiId.trim();
+      if (upiVal && !/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(upiVal)) {
+        return res.status(400).json({ success: false, message: 'Invalid UPI ID format. Expected: yourname@bankname' });
+      }
+      user.upiId = upiVal;
+    }
 
     const updatedUser = await user.save();
 
@@ -165,6 +173,7 @@ export const updateUserProfile = async (req, res) => {
         profileImage: updatedUser.profileImage,
         trustScore: updatedUser.trustScore,
         role: updatedUser.role,
+        upiId: updatedUser.upiId,
         token: generateToken(updatedUser._id),
       },
       message: 'Profile updated successfully!',
@@ -412,6 +421,28 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     res.json({ success: true, message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get UPI details for a seller (used by buyer to build UPI QR)
+// @route   GET /api/auth/upi/:userId
+// @access  Private (authenticated buyers)
+export const getUpiDetails = async (req, res) => {
+  try {
+    const seller = await User.findById(req.params.userId).select('name upiId');
+    if (!seller) {
+      return res.status(404).json({ success: false, message: 'Seller not found' });
+    }
+    // Only expose upiId and name — never password, OTP, or other PII
+    res.json({
+      success: true,
+      data: {
+        name: seller.name,
+        upiId: seller.upiId || '',
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

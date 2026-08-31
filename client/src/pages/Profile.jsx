@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import QRCode from 'qrcode';
 import {
   User as UserIcon, Mail, Phone, MapPin, ShieldCheck,
   Package, RefreshCw, Edit3, Check, Camera,
   QrCode, Heart, ListOrdered, Wallet as WalletIcon, Copy,
-  CheckCircle2, Sparkles, LogOut, Clock, Trash2, Upload
+  CheckCircle2, Sparkles, LogOut, Clock, Trash2, Upload,
+  CreditCard, AlertCircle, ExternalLink, Smartphone,
 } from 'lucide-react';
 
 const Profile = () => {
@@ -28,6 +30,13 @@ const Profile = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [copiedReferral, setCopiedReferral] = useState(false);
 
+  // UPI Payment Settings state
+  const [upiInput, setUpiInput] = useState('');
+  const [upiSaving, setUpiSaving] = useState(false);
+  const [upiMsg, setUpiMsg] = useState({ type: '', text: '' });
+  const [upiPreviewQr, setUpiPreviewQr] = useState('');
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
   useEffect(() => {
     if (!user) return;
     const fetchProfile = async () => {
@@ -42,6 +51,12 @@ const Profile = () => {
           city: userData.city || '',
           profileImage: userData.profileImage || '',
         });
+        // Pre-fill UPI input from saved profile
+        setUpiInput(userData.upiId || '');
+        // If they already have a UPI ID, generate preview QR
+        if (userData.upiId) {
+          generateUpiPreviewQr(userData.upiId, userData.name);
+        }
       } catch (err) {
         setProfileData(user);
         setEditForm({
@@ -50,6 +65,7 @@ const Profile = () => {
           city: user.city || '',
           profileImage: user.profileImage || '',
         });
+        setUpiInput(user.upiId || '');
       } finally {
         setLoading(false);
       }
@@ -134,13 +150,61 @@ const Profile = () => {
     }
   };
 
+  // Generate a preview QR for the seller's own UPI ID
+  const generateUpiPreviewQr = async (upiId, name) => {
+    if (!upiId) { setUpiPreviewQr(''); return; }
+    try {
+      const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name || 'Me')}&cu=INR`;
+      const url = await QRCode.toDataURL(upiString, {
+        width: 320, margin: 2,
+        color: { dark: '#0f172a', light: '#ffffff' },
+        errorCorrectionLevel: 'H',
+      });
+      setUpiPreviewQr(url);
+    } catch (e) {
+      setUpiPreviewQr('');
+    }
+  };
+
+  const handleSaveUpi = async () => {
+    const trimmed = upiInput.trim();
+    // Validate format
+    if (trimmed && !/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(trimmed)) {
+      setUpiMsg({ type: 'error', text: 'Invalid UPI ID. Expected format: yourname@bankname (e.g. user@upi)' });
+      return;
+    }
+    setUpiSaving(true);
+    setUpiMsg({ type: '', text: '' });
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const { data } = await axios.put('http://localhost:5000/api/auth/profile', { upiId: trimmed }, config);
+      setProfileData(prev => ({ ...prev, upiId: data.data.upiId }));
+      const stored = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      localStorage.setItem('userInfo', JSON.stringify({ ...stored, upiId: data.data.upiId }));
+      setUpiMsg({ type: 'success', text: trimmed ? 'UPI ID saved successfully!' : 'UPI ID removed.' });
+      await generateUpiPreviewQr(trimmed, currentUser?.name);
+      setTimeout(() => setUpiMsg({ type: '', text: '' }), 4000);
+    } catch (err) {
+      setUpiMsg({ type: 'error', text: err.response?.data?.message || 'Failed to save UPI ID' });
+    } finally {
+      setUpiSaving(false);
+    }
+  };
+
+  const handleCopyUpi = () => {
+    if (!upiInput.trim()) return;
+    navigator.clipboard.writeText(upiInput.trim());
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+  };
+
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
         <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-[var(--color-zxaaa-primary-bg)] border border-[var(--color-zxaaa-primary-glow)]">
           <UserIcon size={36} className="text-[var(--color-zxaaa-primary)]" />
         </div>
-        <h2 className="text-2xl font-black text-white mb-2">Login to View Profile</h2>
+        <h2 className="text-2xl font-black text-[var(--color-zxaaa-text)] mb-2">Login to View Profile</h2>
         <p className="text-[var(--color-zxaaa-muted)] mb-6 text-center max-w-sm font-bold">
           Sign in to access your personal dashboard, edit details, and track your marketplace Trust Score.
         </p>
@@ -214,7 +278,7 @@ const Profile = () => {
             {/* Name, Email, Phone, City */}
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-black text-white">{currentUser.name || 'User'}</h1>
+                <h1 className="text-2xl sm:text-3xl font-black text-[var(--color-zxaaa-text)]">{currentUser.name || 'User'}</h1>
                 {currentUser.role === 'admin' && (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-[var(--color-zxaaa-primary-bg)] text-[var(--color-zxaaa-primary)] border border-[var(--color-zxaaa-primary-glow)]">
                     Admin
@@ -227,11 +291,11 @@ const Profile = () => {
 
               {/* Direct Email & Phone Display */}
               <div className="flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-y-1.5 gap-x-4 text-xs font-bold text-[var(--color-zxaaa-muted)]">
-                <span className="flex items-center gap-1.5 text-white">
+                <span className="flex items-center gap-1.5 text-[var(--color-zxaaa-text)]">
                   <Mail size={14} className="text-[var(--color-zxaaa-primary)]" />
                   {currentUser.email}
                 </span>
-                <span className="flex items-center gap-1.5 text-white">
+                <span className="flex items-center gap-1.5 text-[var(--color-zxaaa-text)]">
                   <Phone size={14} className="text-emerald-400" />
                   {currentUser.phone || 'Not specified'}
                 </span>
@@ -285,14 +349,14 @@ const Profile = () => {
       {isEditing && (
         <div className="rounded-[24px] p-6 sm:p-8 animate-in slide-in-from-top-4 duration-300 space-y-6"
           style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-primary-glow)' }}>
-          <h3 className="text-lg font-black text-white flex items-center gap-2">
+          <h3 className="text-lg font-black text-[var(--color-zxaaa-text)] flex items-center gap-2">
             <Edit3 size={18} className="text-[var(--color-zxaaa-primary)]" /> Update Personal Information & Photo
           </h3>
 
           {/* Profile Photo Section inside Edit Form */}
-          <div className="p-4 rounded-2xl bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] space-y-4">
-            <label className="block text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <Camera size={14} className="text-[var(--color-zxaaa-primary)]" /> Profile Picture / Avatar
+          <div className="p-4 rounded-2xl bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] space-y-4">
+            <label className="block text-xs font-black text-[var(--color-zxaaa-text)] uppercase tracking-wider flex items-center gap-2">
+              <Camera size={14} className="text-[var(--color-zxaaa-primary)]" /> PROFILE PICTURE / AVATAR
             </label>
 
             <div className="flex flex-col sm:flex-row items-center gap-5">
@@ -311,7 +375,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] hover:border-[var(--color-zxaaa-primary)] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] hover:border-[var(--color-zxaaa-primary)] transition-colors"
                   >
                     <Upload size={14} /> Choose Image from Device
                   </button>
@@ -334,7 +398,7 @@ const Profile = () => {
                     placeholder="Or paste image URL (e.g. https://images.unsplash.com/...)"
                     value={editForm.profileImage}
                     onChange={e => setEditForm({ ...editForm, profileImage: e.target.value })}
-                    className="w-full bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-2 text-xs text-white placeholder:text-[var(--color-zxaaa-muted)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-medium"
+                    className="w-full bg-[var(--color-zxaaa-card)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-2 text-xs text-[var(--color-zxaaa-text)] placeholder:text-[var(--color-zxaaa-muted)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-medium"
                   />
                 </div>
               </div>
@@ -344,7 +408,7 @@ const Profile = () => {
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[var(--color-zxaaa-text)] uppercase tracking-wider mb-2">
                   Full Name
                 </label>
                 <input
@@ -352,12 +416,12 @@ const Profile = () => {
                   required
                   value={editForm.name}
                   onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-bold"
+                  className="w-full bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-zxaaa-text)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[var(--color-zxaaa-text)] uppercase tracking-wider mb-2">
                   Mobile Number
                 </label>
                 <input
@@ -365,12 +429,12 @@ const Profile = () => {
                   required
                   value={editForm.phone}
                   onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                  className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-bold"
+                  className="w-full bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-zxaaa-text)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[var(--color-zxaaa-text)] uppercase tracking-wider mb-2">
                   City / Location
                 </label>
                 <input
@@ -378,7 +442,7 @@ const Profile = () => {
                   required
                   value={editForm.city}
                   onChange={e => setEditForm({ ...editForm, city: e.target.value })}
-                  className="w-full bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-bold"
+                  className="w-full bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-zxaaa-text)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-bold"
                 />
               </div>
             </div>
@@ -387,7 +451,7 @@ const Profile = () => {
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-[var(--color-zxaaa-muted)] hover:text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)]"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-[var(--color-zxaaa-muted)] hover:text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)]"
               >
                 Cancel
               </button>
@@ -402,6 +466,110 @@ const Profile = () => {
           </form>
         </div>
       )}
+
+      {/* ── Payment Settings — UPI ID ── */}
+      <div className="rounded-[24px] p-6 sm:p-8 space-y-6"
+        style={{ background: 'var(--color-zxaaa-card)', border: '1px solid var(--color-zxaaa-border)' }}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #7c3aed22, #4f46e522)', border: '1px solid #7c3aed44' }}>
+            <CreditCard size={18} className="text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-base font-black text-[var(--color-zxaaa-text)]">Payment Settings — UPI ID</h3>
+            <p className="text-xs text-[var(--color-zxaaa-muted)] font-bold">Used to receive payments from buyers. Never shared without your knowledge.</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+
+          {/* Input + controls */}
+          <div className="flex-1 space-y-4">
+            <div>
+              <label className="block text-xs font-black text-[var(--color-zxaaa-text)] uppercase tracking-wider mb-2">
+                Your UPI ID
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="upi-id-input"
+                  type="text"
+                  placeholder="e.g. yourname@upi or 9876543210@ybl"
+                  value={upiInput}
+                  onChange={e => setUpiInput(e.target.value)}
+                  className="flex-1 bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] rounded-xl px-4 py-3 text-sm text-[var(--color-zxaaa-text)] focus:outline-none focus:border-[var(--color-zxaaa-primary-glow)] font-mono placeholder:text-[var(--color-zxaaa-muted)] placeholder:font-sans placeholder:not-italic"
+                />
+                {upiInput.trim() && (
+                  <button
+                    id="btn-copy-upi"
+                    type="button"
+                    onClick={handleCopyUpi}
+                    title="Copy UPI ID"
+                    className="shrink-0 p-3 rounded-xl transition-all"
+                    style={{ background: 'var(--color-zxaaa-card2)', border: '1px solid var(--color-zxaaa-border)', color: copiedUpi ? '#34d399' : 'var(--color-zxaaa-muted)' }}
+                  >
+                    {copiedUpi ? <Check size={16} /> : <Copy size={16} />}
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-[var(--color-zxaaa-muted)] mt-1.5 font-bold">
+                Accepted formats: <span className="font-mono text-[var(--color-zxaaa-text)]">name@upi · name@ybl · name@okaxis · 9876543210@paytm</span>
+              </p>
+            </div>
+
+            {/* Status message */}
+            {upiMsg.text && (
+              <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                upiMsg.type === 'success'
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+              }`}>
+                {upiMsg.type === 'success' ? <Check size={14} /> : <AlertCircle size={14} />}
+                {upiMsg.text}
+              </div>
+            )}
+
+            <button
+              id="btn-save-upi"
+              type="button"
+              onClick={handleSaveUpi}
+              disabled={upiSaving}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black text-white transition-all hover:opacity-90"
+              style={{ background: 'var(--color-zxaaa-primary)', boxShadow: '0 4px 14px var(--color-zxaaa-primary-glow)' }}
+            >
+              {upiSaving ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+              {upiSaving ? 'Saving...' : 'Save UPI ID'}
+            </button>
+
+            {/* Security notice */}
+            <div className="p-3 rounded-xl flex items-start gap-2.5"
+              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <AlertCircle size={14} className="text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-[11px] text-[var(--color-zxaaa-muted)] font-bold leading-relaxed">
+                <span className="text-amber-400">Security: </span>
+                ZXAAA stores your UPI ID to generate payment QR codes for buyers.
+                Your UPI PIN is <strong className="text-white">never</strong> asked, collected, or stored.
+                Do not enter your PIN anywhere on this platform.
+              </div>
+            </div>
+          </div>
+
+          {/* Preview QR */}
+          {upiPreviewQr && upiInput.trim() && (
+            <div className="flex flex-col items-center gap-3 shrink-0">
+              <p className="text-[10px] font-black text-[var(--color-zxaaa-muted)] uppercase tracking-wider">Your UPI QR Preview</p>
+              <div className="p-4 rounded-2xl bg-white shadow-xl border-4 flex items-center justify-center"
+                style={{ borderColor: 'var(--color-zxaaa-primary-glow)', width: 160, height: 160 }}>
+                <img src={upiPreviewQr} alt="Your UPI QR" className="w-full h-full object-contain rounded-lg" />
+              </div>
+              <p className="text-[10px] text-[var(--color-zxaaa-muted)] text-center max-w-[140px] leading-tight">
+                This is how buyers will see your payment QR
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* ── Trust Score & Response Rate Highlights ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -430,7 +598,7 @@ const Profile = () => {
             <Clock size={18} className="text-[var(--color-zxaaa-primary)]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{currentUser.twoHourResponseRate || 98}%</span>
+            <span className="text-3xl font-black text-[var(--color-zxaaa-text)]">{currentUser.twoHourResponseRate || 98}%</span>
             <span className="text-xs font-bold text-emerald-400 font-bold">&lt; 2 hours</span>
           </div>
           <p className="text-[11px] font-bold text-[var(--color-zxaaa-muted)] mt-2">
@@ -462,7 +630,7 @@ const Profile = () => {
           <div className="w-11 h-11 rounded-xl flex items-center justify-center text-[var(--color-zxaaa-primary)] bg-[var(--color-zxaaa-primary-bg)]">
             <ListOrdered size={20} />
           </div>
-          <span className="text-xs font-bold text-white">My Orders</span>
+          <span className="text-xs font-bold text-[var(--color-zxaaa-text)]">My Orders</span>
         </Link>
 
         <Link to="/saved-items" className="p-4 rounded-[20px] flex flex-col items-center gap-2.5 text-center transition-all hover:scale-105"
@@ -470,7 +638,7 @@ const Profile = () => {
           <div className="w-11 h-11 rounded-xl flex items-center justify-center text-rose-400 bg-rose-500/10">
             <Heart size={20} />
           </div>
-          <span className="text-xs font-bold text-white">Saved Items</span>
+          <span className="text-xs font-bold text-[var(--color-zxaaa-text)]">Saved Items</span>
         </Link>
 
         <Link to="/swap" className="p-4 rounded-[20px] flex flex-col items-center gap-2.5 text-center transition-all hover:scale-105"
@@ -478,7 +646,7 @@ const Profile = () => {
           <div className="w-11 h-11 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-500/10">
             <RefreshCw size={20} />
           </div>
-          <span className="text-xs font-bold text-white">Swap Center</span>
+          <span className="text-xs font-bold text-[var(--color-zxaaa-text)]">Swap Center</span>
         </Link>
 
         <Link to="/seller/scan-qr" className="p-4 rounded-[20px] flex flex-col items-center gap-2.5 text-center transition-all hover:scale-105"
@@ -486,7 +654,7 @@ const Profile = () => {
           <div className="w-11 h-11 rounded-xl flex items-center justify-center text-blue-400 bg-blue-500/10">
             <QrCode size={20} />
           </div>
-          <span className="text-xs font-bold text-white">Scan QR</span>
+          <span className="text-xs font-bold text-[var(--color-zxaaa-text)]">Scan QR</span>
         </Link>
       </div>
 
@@ -496,7 +664,7 @@ const Profile = () => {
         <div className="space-y-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2">
             <Sparkles size={16} className="text-amber-400" />
-            <h4 className="text-base font-black text-white">Your Referral Code</h4>
+            <h4 className="text-base font-black text-[var(--color-zxaaa-text)]">Your Referral Code</h4>
           </div>
           <p className="text-xs font-bold text-[var(--color-zxaaa-muted)]">
             Share with friends and earn 50 wallet credits on their first trade.
@@ -504,7 +672,7 @@ const Profile = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="px-5 py-2.5 rounded-xl font-mono text-sm font-black text-white bg-[var(--color-zxaaa-bg)] border border-[var(--color-zxaaa-border)] tracking-wider">
+          <div className="px-5 py-2.5 rounded-xl font-mono text-sm font-black text-[var(--color-zxaaa-text)] bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] tracking-wider">
             {currentUser.referralCode || `ZX-${(currentUser._id || 'USER').substring(0, 6).toUpperCase()}`}
           </div>
           <button

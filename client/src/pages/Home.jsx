@@ -5,6 +5,7 @@ import { useLocationContext } from '../context/LocationContext';
 import { useAuth } from '../context/AuthContext';
 import HowItWorksModal from '../components/HowItWorksModal';
 import Logo from '../components/Logo';
+import HeroCarousel from '../components/HeroCarousel';
 import ProductCard, { ProductCardSkeleton } from '../components/ProductCard';
 import {
   Search, Plus, RefreshCw, QrCode, ArrowRight, Sparkles, MapPin, Package, ShieldCheck, CheckCircle2, MessageSquare, Repeat
@@ -230,6 +231,11 @@ export default function Home() {
                 Sell Something <Plus size={18} />
               </Link>
             </div>
+          </div>
+
+          {/* ── Hero Image Carousel (right side on desktop, bottom on mobile) ── */}
+          <div className="flex w-full items-center justify-center lg:justify-end mt-4 lg:mt-0" style={{ maxWidth: 500, margin: '0 auto' }}>
+            <HeroCarousel />
           </div>
 
         </div>

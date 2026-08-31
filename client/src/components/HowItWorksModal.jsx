@@ -26,7 +26,7 @@ const HowItWorksModal = ({ isOpen, onClose }) => {
           <span className="bg-purple-500/20 text-purple-300 text-xs font-bold px-3 py-1 rounded-full border border-purple-500/30 uppercase tracking-wider inline-block mb-3">
             ZXAAA Marketplace Guide
           </span>
-          <h2 className="text-3xl font-extrabold text-white gradient-text mb-2">
+          <h2 className="text-3xl font-extrabold text-[var(--color-zxaaa-text)] mb-2">
             How ZXAAA Works
           </h2>
           <p className="text-sm text-[var(--color-zxaaa-muted)] max-w-md mx-auto">
@@ -46,7 +46,7 @@ const HowItWorksModal = ({ isOpen, onClose }) => {
                 <span className="text-xs font-bold text-purple-400 uppercase tracking-wide">
                   Step 1
                 </span>
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-[var(--color-zxaaa-text)]">
                   Discover Local Listings & Swaps
                 </h3>
               </div>
@@ -66,7 +66,7 @@ const HowItWorksModal = ({ isOpen, onClose }) => {
                 <span className="text-xs font-bold text-purple-400 uppercase tracking-wide">
                   Step 2
                 </span>
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-[var(--color-zxaaa-text)]">
                   Meet & Inspect Physically
                 </h3>
               </div>
@@ -86,7 +86,7 @@ const HowItWorksModal = ({ isOpen, onClose }) => {
                 <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
                   Step 3
                 </span>
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-[var(--color-zxaaa-text)]">
                   Scan QR Verification & Instant Receipt
                 </h3>
               </div>

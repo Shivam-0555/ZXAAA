@@ -58,14 +58,29 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
     <div className="product-card group relative flex flex-col justify-between h-full">
       <Link to={`/product/${product._id}`} className="block flex-1">
         {/* Image Container */}
-        <div className="relative overflow-hidden rounded-t-[inherit]" style={{ height: compact ? 160 : 195 }}>
+        <div 
+          className="relative overflow-hidden rounded-t-[inherit] flex items-center justify-center" 
+          style={{ height: compact ? 160 : 195, background: 'var(--color-zxaaa-card2)' }}
+        >
           {imgSrc && !imgErr ? (
-            <img
-              src={imgSrc}
-              alt={product.title}
-              className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500 ease-out"
-              onError={() => setImgErr(true)}
-            />
+            <>
+              {/* Ambient backdrop blur fill — matches image colours, fills any white margins */}
+              <img
+                src={imgSrc}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-50 pointer-events-none"
+              />
+              {/* Dark gradient overlay for contrast on badges */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-[1] pointer-events-none" />
+              {/* Crisp main product photo — uses object-contain so full product is always visible */}
+              <img
+                src={imgSrc}
+                alt={product.title}
+                className="relative z-[2] w-full h-full object-contain group-hover:scale-[1.06] transition-transform duration-500 ease-out px-1"
+                onError={() => setImgErr(true)}
+              />
+            </>
           ) : (
             <ProductImageFallback category={product.category} />
           )}

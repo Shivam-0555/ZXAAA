@@ -9,7 +9,8 @@ import {
   requestOtp,
   verifyOtpLogin,
   verifyResetOtp,
-  resetPassword
+  resetPassword,
+  getUpiDetails,
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -28,4 +29,8 @@ router.post('/verify-otp-login', verifyOtpLogin);
 router.post('/verify-reset-otp', verifyResetOtp);
 router.post('/reset-password', resetPassword);
 
+// UPI Details (buyer fetches seller's UPI ID to build payment QR)
+router.get('/upi/:userId', protect, getUpiDetails);
+
 export default router;
+

@@ -104,6 +104,18 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    upiId: {
+      type: String,
+      default: '',
+      trim: true,
+      validate: {
+        validator: function (v) {
+          // Allow empty, or match basic UPI address format: handle@provider
+          return !v || /^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(v);
+        },
+        message: 'Invalid UPI ID format. Expected format: yourname@bankname',
+      },
+    },
     otp: {
       type: String,
     },
