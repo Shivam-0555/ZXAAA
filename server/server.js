@@ -9,12 +9,26 @@ import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cors());
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+}));
+
 app.use(helmet());
 app.use(morgan('dev'));
 
@@ -34,9 +48,6 @@ import adminRoutes from './routes/adminRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
-import { checkAndExpireOrders } from './utils/expirationTask.js';
-import http from 'http';
-import { Server } from 'socket.io';
 
 // Basic Route
 app.get('/', (req, res) => {
@@ -55,43 +66,13 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reports', reportRoutes);
 
-// Database Connection & Automated Background Job
-mongoose
-  .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/zxaaa')
-  .then(() => {
-    console.log('MongoDB connected');
-    // Run order expiration check immediately and then every 60 seconds
-    checkAndExpireOrders();
-    setInterval(checkAndExpireOrders, 60 * 1000);
-  })
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Connect to MongoDB (shared connection, safe to call multiple times)
+let isConnected = false;
+export async function connectDB() {
+  if (isConnected) return;
+  await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/zxaaa');
+  isConnected = true;
+  console.log('MongoDB connected');
+}
 
-// Socket.io Setup
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    methods: ['GET', 'POST']
-  }
-});
-
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
-  
-  socket.on('join_room', (room) => {
-    socket.join(room);
-  });
-  
-  socket.on('send_message', (data) => {
-    socket.to(data.room).emit('receive_message', data);
-  });
-  
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
-
-// Start Server
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default app;
