@@ -97,14 +97,38 @@ const productSchema = new mongoose.Schema(
       enum: ['PENDING', 'APPROVED', 'REJECTED'],
       default: 'PENDING',
     },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Pre-save hook to generate SEO-friendly slug
+productSchema.pre('save', function (next) {
+  if (this.title && (!this.slug || this.isModified('title') || this.isModified('city'))) {
+    const rawSlug = `${this.title}-${this.city || ''}-${this._id ? this._id.toString().slice(-6) : Date.now()}`;
+    this.slug = rawSlug
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+  next();
+});
+
 productSchema.index({ location: '2dsphere' });
-productSchema.index({ title: 'text', description: 'text', brand: 'text' });
+productSchema.index(
+  { title: 'text', brand: 'text', category: 'text', description: 'text', city: 'text' },
+  { weights: { title: 10, brand: 5, category: 3, description: 1, city: 2 }, name: 'product_search_text_idx' }
+);
+productSchema.index({ status: 1, city: 1, price: 1 });
 
 const Product = mongoose.model('Product', productSchema);
 export default Product;

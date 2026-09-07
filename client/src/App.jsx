@@ -25,6 +25,7 @@ import Notifications from './pages/Notifications';
 // New Pages & Components
 import SavedItems from './pages/SavedItems';
 import Orders from './pages/Orders';
+import OrderDetails from './pages/OrderDetails';
 import Wallet from './pages/Wallet';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
@@ -52,19 +53,13 @@ const CATEGORIES = [
   { name: 'More', icon: <MoreHorizontal size={16} /> }
 ];
 
+import SearchAutocomplete from './components/SearchAutocomplete';
+
 function TopNavbar({ setLocationModalOpen }) {
   const { user, logout } = useAuth();
   const { selectedLocation } = useLocationContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchQ, setSearchQ] = useState('');
   const navigate = useNavigate();
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchQ.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(searchQ)}`);
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -96,16 +91,7 @@ function TopNavbar({ setLocationModalOpen }) {
 
         {/* Center: Search */}
         <div className="flex-1 max-w-2xl hidden md:block">
-          <form onSubmit={handleSearchSubmit} className="relative w-full">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-zxaaa-muted)]" />
-            <input
-              type="text"
-              value={searchQ}
-              onChange={e => setSearchQ(e.target.value)}
-              placeholder="Search products, brands or categories..."
-              className="w-full text-sm text-[var(--color-zxaaa-text)] placeholder:text-[var(--color-zxaaa-muted)] pl-12 pr-4 py-2.5 rounded-full focus:outline-none transition-all bg-[var(--color-zxaaa-card2)] border border-[var(--color-zxaaa-border)] focus:border-[var(--color-zxaaa-primary)] focus:shadow-[0_0_0_1px_var(--color-zxaaa-primary-bg)] font-medium"
-            />
-          </form>
+          <SearchAutocomplete placeholder="Search products, brands or categories..." />
         </div>
 
         {/* Right: Actions */}
@@ -244,6 +230,7 @@ function MainLayout() {
           <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/saved-items"    element={<ProtectedRoute><SavedItems /></ProtectedRoute>} />
           <Route path="/orders"         element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/orders/:id"     element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
           <Route path="/wallet"         element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
           <Route path="/settings"       element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         </Routes>

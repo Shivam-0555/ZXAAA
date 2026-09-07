@@ -41,9 +41,23 @@ export function ProductCardSkeleton() {
   );
 }
 
+import api from '../services/api';
+
 export default function ProductCard({ product, compact = false, onSwapClick }) {
   const [imgErr, setImgErr] = useState(false);
   const [liked, setLiked] = useState(false);
+
+  const handleToggleLike = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newLiked = !liked;
+    setLiked(newLiked);
+    try {
+      await api.post('/wishlist/toggle', { productId: product._id });
+    } catch (err) {
+      setLiked(!newLiked);
+    }
+  };
 
   if (!product) return null;
 
@@ -115,11 +129,7 @@ export default function ProductCard({ product, compact = false, onSwapClick }) {
 
           {/* Favorite button */}
           <button
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              setLiked(l => !l);
-            }}
+            onClick={handleToggleLike}
             className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all z-10 hover:scale-110 active:scale-95"
             style={{
               background: liked ? 'rgba(239,68,68,0.95)' : 'rgba(0,0,0,0.6)',

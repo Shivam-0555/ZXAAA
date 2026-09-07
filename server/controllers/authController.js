@@ -23,6 +23,16 @@ export const registerUser = async (req, res) => {
     if (!name || !email || !phone || !password || !city) {
       return res.status(400).json({ success: false, message: 'Please fill in all required fields' });
     }
+    // Password policy validation
+    const passwordErrors = [];
+    if (password.length < 8) passwordErrors.push('At least 8 characters');
+    if (!/[A-Z]/.test(password)) passwordErrors.push('At least 1 uppercase letter');
+    if (!/[a-z]/.test(password)) passwordErrors.push('At least 1 lowercase letter');
+    if (!/[0-9]/.test(password)) passwordErrors.push('At least 1 number');
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) passwordErrors.push('At least 1 special character');
+    if (passwordErrors.length) {
+      return res.status(400).json({ success: false, message: 'Password does not meet requirements: ' + passwordErrors.join(', ') });
+    }
 
     const emailExists = await User.findOne({ email: email.toLowerCase().trim() });
     if (emailExists) {

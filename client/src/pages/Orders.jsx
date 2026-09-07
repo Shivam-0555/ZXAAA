@@ -207,16 +207,24 @@ export default function Orders() {
                     </div>
                   </div>
 
-                  {/* Show UPI QR button for pending UPI orders */}
-                  {isUpiPending(ord) && (
-                    <button
-                      onClick={() => setUpiModalOrder(ord)}
-                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
-                      style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', boxShadow: '0 2px 10px rgba(124,58,237,0.35)' }}
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      to={`/orders/${ord._id}`}
+                      className="px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-zxaaa-primary)] border border-[var(--color-zxaaa-primary-glow)] bg-[var(--color-zxaaa-primary-bg)] hover:bg-[var(--color-zxaaa-primary)] hover:text-white transition-all flex items-center gap-1.5"
                     >
-                      <QrCode size={14} /> Show UPI QR
-                    </button>
-                  )}
+                      <Clock size={13} /> View Timeline
+                    </Link>
+                    {isUpiPending(ord) && (
+                      <button
+                        onClick={() => setUpiModalOrder(ord)}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
+                        style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', boxShadow: '0 2px 10px rgba(124,58,237,0.35)' }}
+                      >
+                        <QrCode size={14} /> Show UPI QR
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Pending payment notice inline */}

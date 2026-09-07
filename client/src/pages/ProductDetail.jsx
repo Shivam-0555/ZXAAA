@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import RealQRCode from '../components/RealQRCode';
 import UpiQRPanel from '../components/UpiQRPanel';
+import SeoHead from '../components/SeoHead';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -43,6 +44,8 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
+  const [isEmergency, setIsEmergency] = useState(false);
+
   const handleBuy = async (method) => {
     if (!user) {
       alert('Please login to buy');
@@ -55,7 +58,12 @@ const ProductDetail = () => {
       const paymentMethod = method === 'upi' ? 'Online Payment' : 'Pay at Pickup';
       const { data } = await axios.post(
         'http://localhost:5000/api/orders',
-        { productId: id, paymentMethod },
+        {
+          productId: id,
+          paymentMethod,
+          isEmergency,
+          emergencyCharge: isEmergency ? 100 : 0
+        },
         config
       );
       setBuyMethod(method);
@@ -137,6 +145,15 @@ const ProductDetail = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-16">
+      {/* Dynamic SEO Metadata & Schema.org JSON-LD */}
+      <SeoHead
+        title={`${product.title} in ${product.city || 'Vadodara'} - Buy & Swap on ZXAAA`}
+        description={product.description || `Buy or swap ${product.title} in ${product.city || 'Vadodara'} for ₹${product.price}. Verified seller on ZXAAA.`}
+        keywords={`${product.title}, ${product.category}, ${product.brand || ''}, ${product.city || 'Vadodara'}, buy used ${product.category}`}
+        image={currentMainImage}
+        canonicalUrl={window.location.origin + `/product/${product.slug || product._id}`}
+        productData={product}
+      />
 
       {/* Fullscreen Lightbox */}
       {isZoomed && (
@@ -337,6 +354,36 @@ const ProductDetail = () => {
             {/* ── Buy Actions ── */}
             {product.status === 'ACTIVE' && !isOwner && !order && (
               <div className="mt-8 space-y-3">
+                {/* Emergency Purchase Selector */}
+                <div
+                  onClick={() => setIsEmergency(!isEmergency)}
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                    isEmergency
+                      ? 'bg-amber-500/10 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                      : 'bg-[var(--color-zxaaa-card2)] border-[var(--color-zxaaa-border)] hover:border-amber-500/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isEmergency}
+                      onChange={(e) => setIsEmergency(e.target.checked)}
+                      className="w-4 h-4 accent-amber-500 cursor-pointer"
+                    />
+                    <div>
+                      <p className="text-xs font-black text-[var(--color-zxaaa-text)] flex items-center gap-1.5">
+                        ⚡ Request Emergency Fast Handover (+₹100)
+                      </p>
+                      <p className="text-[10px] text-[var(--color-zxaaa-muted)]">
+                        Priority notification sent to seller for urgent meetup within 1 hour.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-black text-amber-400 shrink-0">
+                    Final: ₹{(product.price + (isEmergency ? 100 : 0)).toLocaleString('en-IN')}
+                  </span>
+                </div>
+
                 {/* Pay via UPI */}
                 <button
                   id="btn-buy-upi"

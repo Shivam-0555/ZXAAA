@@ -9,7 +9,7 @@ import { createNotificationInternal } from './notificationController.js';
 // @access  Private
 export const createOrder = async (req, res) => {
   try {
-    const { productId, paymentMethod } = req.body;
+    const { productId, paymentMethod, isEmergency, emergencyCharge, meetupPoint, meetupTime } = req.body;
     const buyerId = req.user._id;
 
     const product = await Product.findById(productId);
@@ -29,14 +29,37 @@ export const createOrder = async (req, res) => {
     const orderId = `ORD-${Date.now()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const qrReference = `ZX-TXN-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
+    const now = new Date();
+
+    // Emergency purchase backend validation
+    const emergencyFlag = Boolean(isEmergency);
+    const validEmergencyCharge = emergencyFlag ? Number(emergencyCharge || 100) : 0;
+    const amount = Number(product.price);
+    const finalAmount = amount + validEmergencyCharge;
+
     const order = new Order({
       orderId,
       buyer: buyerId,
       seller: product.seller,
       product: productId,
-      amount: product.price,
+      amount,
+      isEmergency: emergencyFlag,
+      emergencyCharge: validEmergencyCharge,
+      finalAmount,
+      meetupPoint: meetupPoint || '',
+      meetupTime: meetupTime || '',
       paymentMethod,
       qrReference,
+      timeline: {
+        orderCreated: { status: 'completed', timestamp: now },
+        sellerNotified: { status: 'completed', timestamp: now },
+        sellerResponsePending: { status: 'current', timestamp: now },
+        sellerAccepted: { status: 'pending' },
+        paymentConfirmed: { status: 'pending' },
+        pickupReady: { status: 'pending' },
+        qrVerified: { status: 'pending' },
+        orderCompleted: { status: 'pending' },
+      },
     });
 
     const createdOrder = await order.save();
@@ -163,10 +186,22 @@ export const verifyQR = async (req, res) => {
 
     const savedTxn = await transaction.save();
 
-    // Update Order → COMPLETED
+    // Update Order → COMPLETED and update Timeline
+    const completedTime = new Date();
     order.transaction = savedTxn._id;
     order.orderStatus = 'COMPLETED';
     order.paymentStatus = 'SUCCESS';
+
+    if (!order.timeline) order.timeline = {};
+    order.timeline.orderCreated = { status: 'completed', timestamp: order.timeline.orderCreated?.timestamp || order.createdAt || completedTime };
+    order.timeline.sellerNotified = { status: 'completed', timestamp: order.timeline.sellerNotified?.timestamp || order.createdAt || completedTime };
+    order.timeline.sellerResponsePending = { status: 'completed', timestamp: order.timeline.sellerResponsePending?.timestamp || order.createdAt || completedTime };
+    order.timeline.sellerAccepted = { status: 'completed', timestamp: order.timeline.sellerAccepted?.timestamp || order.createdAt || completedTime };
+    order.timeline.paymentConfirmed = { status: 'completed', timestamp: order.timeline.paymentConfirmed?.timestamp || completedTime };
+    order.timeline.pickupReady = { status: 'completed', timestamp: order.timeline.pickupReady?.timestamp || completedTime };
+    order.timeline.qrVerified = { status: 'completed', timestamp: completedTime };
+    order.timeline.orderCompleted = { status: 'completed', timestamp: completedTime };
+
     await order.save();
 
     // Update Product → SOLD (prevents double purchase)
@@ -216,18 +251,82 @@ export const verifyQR = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error during verification' });
   }
 };
-// @desc    Get logged-in user's orders (as buyer)
+// Helper to ensure order timeline structure exists and is up to date
+const prepareOrderTimeline = (order) => {
+  if (!order) return order;
+  const now = order.createdAt || new Date();
+  const isCompleted = order.orderStatus === 'COMPLETED';
+  const isPaid = order.paymentStatus === 'SUCCESS' || isCompleted;
+
+  if (!order.timeline) {
+    order.timeline = {};
+  }
+
+  // Ensure default timestamps and statuses
+  if (!order.timeline.orderCreated || !order.timeline.orderCreated.timestamp) {
+    order.timeline.orderCreated = { status: 'completed', timestamp: now };
+  }
+  if (!order.timeline.sellerNotified || !order.timeline.sellerNotified.timestamp) {
+    order.timeline.sellerNotified = { status: 'completed', timestamp: now };
+  }
+  if (!order.timeline.sellerResponsePending || !order.timeline.sellerResponsePending.status) {
+    const isAccepted = order.timeline.sellerAccepted?.status === 'completed' || isCompleted || isPaid;
+    order.timeline.sellerResponsePending = {
+      status: 'completed',
+      timestamp: now,
+    };
+  }
+  if (!order.timeline.sellerAccepted || !order.timeline.sellerAccepted.status) {
+    const isAccepted = isCompleted || isPaid;
+    order.timeline.sellerAccepted = {
+      status: isAccepted ? 'completed' : 'pending',
+      timestamp: isAccepted ? (order.updatedAt || now) : null,
+    };
+  }
+  if (!order.timeline.paymentConfirmed || !order.timeline.paymentConfirmed.status) {
+    order.timeline.paymentConfirmed = {
+      status: isPaid ? 'completed' : 'pending',
+      timestamp: isPaid ? (order.updatedAt || now) : null,
+    };
+  }
+  if (!order.timeline.pickupReady || !order.timeline.pickupReady.status) {
+    order.timeline.pickupReady = {
+      status: isCompleted ? 'completed' : 'pending',
+      timestamp: isCompleted ? (order.updatedAt || now) : null,
+    };
+  }
+  if (!order.timeline.qrVerified || !order.timeline.qrVerified.status) {
+    order.timeline.qrVerified = {
+      status: isCompleted ? 'completed' : 'pending',
+      timestamp: isCompleted ? (order.updatedAt || now) : null,
+    };
+  }
+  if (!order.timeline.orderCompleted || !order.timeline.orderCompleted.status) {
+    order.timeline.orderCompleted = {
+      status: isCompleted ? 'completed' : 'pending',
+      timestamp: isCompleted ? (order.updatedAt || now) : null,
+    };
+  }
+
+  return order;
+};
+
+// @desc    Get logged-in user's orders (as buyer or seller)
 // @route   GET /api/orders/myorders
 // @access  Private
 export const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ buyer: req.user._id })
+    const orders = await Order.find({
+      $or: [{ buyer: req.user._id }, { seller: req.user._id }]
+    })
       .populate('product', 'title images price category condition')
       .populate('seller', 'name trustScore upiId')
       .populate('buyer', 'name email')
       .sort({ createdAt: -1 });
 
-    res.json({ success: true, data: orders });
+    const formattedOrders = orders.map(ord => prepareOrderTimeline(ord));
+
+    res.json({ success: true, data: formattedOrders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -256,7 +355,106 @@ export const getOrderById = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized to view this order' });
     }
 
-    res.json({ success: true, data: order });
+    const formattedOrder = prepareOrderTimeline(order);
+
+    res.json({ success: true, data: formattedOrder });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Seller accepts an order
+// @route   PUT /api/orders/:id/accept
+// @access  Private (seller only)
+export const acceptOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Only the seller can accept this order' });
+    }
+
+    const now = new Date();
+    if (!order.timeline) order.timeline = {};
+
+    order.timeline.orderCreated = { status: 'completed', timestamp: order.timeline.orderCreated?.timestamp || order.createdAt || now };
+    order.timeline.sellerNotified = { status: 'completed', timestamp: order.timeline.sellerNotified?.timestamp || order.createdAt || now };
+    order.timeline.sellerResponsePending = { status: 'completed', timestamp: order.timeline.sellerResponsePending?.timestamp || order.createdAt || now };
+    order.timeline.sellerAccepted = { status: 'completed', timestamp: now };
+
+    await order.save();
+
+    // Notify Buyer
+    await createNotificationInternal({
+      user: order.buyer,
+      type: 'order',
+      title: 'Seller Accepted Order! ✅',
+      message: `The seller accepted your order request #${order.orderId.slice(-8)}.`,
+      link: `/orders/${order._id}`
+    });
+
+    const updatedOrder = await Order.findById(order._id)
+      .populate('product', 'title images price category condition')
+      .populate('seller', 'name trustScore upiId')
+      .populate('buyer', 'name email');
+
+    res.json({
+      success: true,
+      message: 'Order accepted successfully',
+      data: prepareOrderTimeline(updatedOrder)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Seller marks item ready for pickup
+// @route   PUT /api/orders/:id/pickup-ready
+// @access  Private (seller only)
+export const markPickupReady = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Only the seller can update pickup status' });
+    }
+
+    const now = new Date();
+    if (!order.timeline) order.timeline = {};
+
+    order.timeline.orderCreated = { status: 'completed', timestamp: order.timeline.orderCreated?.timestamp || order.createdAt || now };
+    order.timeline.sellerNotified = { status: 'completed', timestamp: order.timeline.sellerNotified?.timestamp || order.createdAt || now };
+    order.timeline.sellerResponsePending = { status: 'completed', timestamp: order.timeline.sellerResponsePending?.timestamp || order.createdAt || now };
+    order.timeline.sellerAccepted = { status: 'completed', timestamp: order.timeline.sellerAccepted?.timestamp || now };
+    order.timeline.pickupReady = { status: 'completed', timestamp: now };
+
+    await order.save();
+
+    // Notify Buyer
+    await createNotificationInternal({
+      user: order.buyer,
+      type: 'order',
+      title: 'Item Ready for Pickup! 📦',
+      message: `The seller has marked your order ready for pickup. Show your QR code during handover.`,
+      link: `/orders/${order._id}`
+    });
+
+    const updatedOrder = await Order.findById(order._id)
+      .populate('product', 'title images price category condition')
+      .populate('seller', 'name trustScore upiId')
+      .populate('buyer', 'name email');
+
+    res.json({
+      success: true,
+      message: 'Order marked as ready for pickup',
+      data: prepareOrderTimeline(updatedOrder)
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -291,6 +489,8 @@ export const completeUpiPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order is already completed' });
     }
 
+    const now = new Date();
+
     // Create a transaction record
     const transaction = await Transaction.create({
       order: order._id,
@@ -303,9 +503,20 @@ export const completeUpiPayment = async (req, res) => {
       paymentMethod: order.paymentMethod,
     });
 
-    // Update order status
+    // Update order status & timeline
     order.orderStatus = 'COMPLETED';
     order.paymentStatus = 'SUCCESS';
+
+    if (!order.timeline) order.timeline = {};
+    order.timeline.orderCreated = { status: 'completed', timestamp: order.timeline.orderCreated?.timestamp || order.createdAt || now };
+    order.timeline.sellerNotified = { status: 'completed', timestamp: order.timeline.sellerNotified?.timestamp || order.createdAt || now };
+    order.timeline.sellerResponsePending = { status: 'completed', timestamp: order.timeline.sellerResponsePending?.timestamp || order.createdAt || now };
+    order.timeline.sellerAccepted = { status: 'completed', timestamp: order.timeline.sellerAccepted?.timestamp || now };
+    order.timeline.paymentConfirmed = { status: 'completed', timestamp: now };
+    order.timeline.pickupReady = { status: 'completed', timestamp: order.timeline.pickupReady?.timestamp || now };
+    order.timeline.qrVerified = { status: 'completed', timestamp: order.timeline.qrVerified?.timestamp || now };
+    order.timeline.orderCompleted = { status: 'completed', timestamp: now };
+
     await order.save();
 
     // Update product status
@@ -323,8 +534,92 @@ export const completeUpiPayment = async (req, res) => {
     res.json({
       success: true,
       message: 'Payment marked as complete and receipt generated',
-      data: updatedOrder,
+      data: prepareOrderTimeline(updatedOrder),
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Seller declines order request
+// @route   PUT /api/orders/:id/decline
+// @access  Private (seller only)
+export const declineOrder = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const order = await Order.findById(req.params.id).populate('product');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Only seller can decline this order' });
+    }
+
+    order.orderStatus = 'DECLINED';
+    order.declineReason = reason || 'Seller declined request';
+    await order.save();
+
+    // Revert product back to ACTIVE
+    if (order.product && order.product.status === 'RESERVED') {
+      order.product.status = 'ACTIVE';
+      await order.product.save();
+    }
+
+    await createNotificationInternal({
+      user: order.buyer,
+      type: 'order',
+      title: 'Order Declined ❌',
+      message: `Seller declined order #${order.orderId.slice(-8)}. Reason: ${order.declineReason}`,
+      link: `/orders/${order._id}`
+    });
+
+    res.json({ success: true, message: 'Order request declined', data: order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Buyer or Seller cancels order
+// @route   PUT /api/orders/:id/cancel
+// @access  Private (buyer or seller)
+export const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('product');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const userId = req.user._id.toString();
+    if (order.buyer.toString() !== userId && order.seller.toString() !== userId) {
+      return res.status(403).json({ success: false, message: 'Not authorized to cancel this order' });
+    }
+
+    if (order.orderStatus === 'COMPLETED') {
+      return res.status(400).json({ success: false, message: 'Completed orders cannot be cancelled' });
+    }
+
+    order.orderStatus = 'CANCELLED';
+    await order.save();
+
+    // Revert product back to ACTIVE
+    if (order.product && order.product.status === 'RESERVED') {
+      order.product.status = 'ACTIVE';
+      await order.product.save();
+    }
+
+    const otherUser = order.buyer.toString() === userId ? order.seller : order.buyer;
+    await createNotificationInternal({
+      user: otherUser,
+      type: 'order',
+      title: 'Order Cancelled 🚫',
+      message: `Order #${order.orderId.slice(-8)} was cancelled.`,
+      link: `/orders/${order._id}`
+    });
+
+    res.json({ success: true, message: 'Order cancelled successfully', data: order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

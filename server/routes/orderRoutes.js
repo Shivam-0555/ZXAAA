@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrder, verifyQR, getMyOrders, getOrderById, completeUpiPayment } from '../controllers/orderController.js';
+import { createOrder, verifyQR, getMyOrders, getOrderById, completeUpiPayment, acceptOrder, markPickupReady, declineOrder, cancelOrder } from '../controllers/orderController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -17,6 +17,17 @@ router.route('/verify-qr')
 router.route('/complete-upi')
   .post(protect, completeUpiPayment);
 
+router.route('/:id/accept')
+  .put(protect, acceptOrder);
+
+router.route('/:id/decline')
+  .put(protect, declineOrder);
+
+router.route('/:id/cancel')
+  .put(protect, cancelOrder);
+
+router.route('/:id/pickup-ready')
+  .put(protect, markPickupReady);
 
 router.route('/:id')
   .get(protect, getOrderById);

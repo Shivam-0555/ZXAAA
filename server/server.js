@@ -32,6 +32,9 @@ import messageRoutes from './routes/messageRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import wishlistRoutes from './routes/wishlistRoutes.js';
+import reportRoutes from './routes/reportRoutes.js';
+import { checkAndExpireOrders } from './utils/expirationTask.js';
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -49,11 +52,18 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/reports', reportRoutes);
 
-// Database Connection
+// Database Connection & Automated Background Job
 mongoose
   .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/zxaaa')
-  .then(() => console.log('MongoDB connected'))
+  .then(() => {
+    console.log('MongoDB connected');
+    // Run order expiration check immediately and then every 60 seconds
+    checkAndExpireOrders();
+    setInterval(checkAndExpireOrders, 60 * 1000);
+  })
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Socket.io Setup
